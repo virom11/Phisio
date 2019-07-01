@@ -13,7 +13,7 @@ max=0
 min=100
 predictor_model = "E:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
 
-dir="D:/Dropbox/Студенты/Подбородок\Круглый";
+dir="D:/Dropbox/Студенты/Брови\Сросшиеся";
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
     count=0 # Счетчик фоток в папке
     file_name=dir+"/"+filename
@@ -117,7 +117,7 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             print("Голубые глаза: ", priznak[16])
             print("Зеленые глаза: ", priznak[17])
             print("Карие и черные глаза: ", priznak[18])
-            print("Серые глаза: ", priznak[19])'''
+            print("Серые глаза: ", priznak[19])
 
             priznak[40] =detect.chin_size(pose_landmarks, prop)
             priznak[43] = 100 - priznak[40]
@@ -126,10 +126,12 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             priznak[42] = detect.chin_form(pose_landmarks, prop)
             priznak[41] = 100 - priznak[42]
             print("Квадратный подбородок: ", priznak[41])
-            print("Круглый подбородок: ", priznak[42])
+            print("Круглый подбородок: ", priznak[42])'''
 
-            if priznak[41]>max: max=priznak[41]
-            if priznak[41] < min: min = priznak[41]
+            priznak[8] = detect.eyebrows_accreted(pose_landmarks, image1)
+            print("Сросшиеся брови: ", priznak[8])
+            if priznak[8]>max: max=priznak[8]
+            if priznak[8] < min: min = priznak[8]
 print("Максимум: ",max)
 print("Минимум: ",min)
 

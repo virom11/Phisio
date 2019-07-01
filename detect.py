@@ -142,3 +142,30 @@ def chin_form(pose_landmarks, prop):
     if form < 0:
         form = 0
     return (form)
+
+# расчет Сросшиеся брови
+def eyebrows_accreted(pose_landmarks, im):
+    rs = 0
+    bs = 0
+    gs = 0
+    all = 0
+    nose_color = 0
+    max_y = max(pose_landmarks.part(21).y,pose_landmarks.part(22).y)
+    min_y = round((pose_landmarks.part(27).y - max_y)/2)+max_y
+    count=((pose_landmarks.part(22).x - pose_landmarks.part(21).x))*(min_y - max_y)+1
+    for i in range(pose_landmarks.part(21).x, pose_landmarks.part(22).x):
+        for j in range(max_y, min_y):
+            r, g, b = im.getpixel((i, j))
+            all+=r+b+g
+    all /= count
+    for i in range(pose_landmarks.part(28).y, pose_landmarks.part(29).y):
+        r, g, b = im.getpixel((pose_landmarks.part(30).x, pose_landmarks.part(30).y))
+        nose_color += r + g + b
+    nose_color/=pose_landmarks.part(29).y - pose_landmarks.part(28).y+1
+    r=nose_color-all
+    if r > 220:
+        r = 100
+    elif r < 40:
+        r = 0
+    else: r = (r - 40) / 1.8
+    return (r)
