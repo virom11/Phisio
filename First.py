@@ -8,35 +8,35 @@ from PIL import Image, ImageDraw
 from skimage import io
 from skimage.feature import hog
 
-priznak=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+priznak=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]  # Массив значений признаков
 max=0
 min=100
-predictor_model = "E:/shape_predictor_68_face_landmarks.dat"
+predictor_model = "E:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
 
 dir="D:/Dropbox/Студенты/Подбородок\Круглый";
-for filename in os.listdir(dir):
-    count=0
+for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
+    count=0 # Счетчик фоток в папке
     file_name=dir+"/"+filename
     print(file_name)
-    if (file_name.endswith("_hog.jpg")==0) and (file_name.endswith("_detect.jpg")==0):
+    if (file_name.endswith("_hog.jpg")==0) and (file_name.endswith("_detect.jpg")==0):  # Работаем только с оригиналом фото, не hog и не распознанное
         count=count+1
         #file_name = 'E:/567.jpg'
         #file_name = 'D:/Dropbox/Студенты/Губы/Уголки губ вниз/331919_parni_iz_seriala_dnevniki_vampira.jpg';
 
         # Create a HOG face detector using the built-in dlib class
         face_detector = dlib.get_frontal_face_detector()
-        image1 = Image.open(file_name)
+        image1 = Image.open(file_name) # Здесь откроет фото
         # Load the image into an array
-        image = io.imread(file_name)
-        #win = dlib.image_window()
+        image = io.imread(file_name) # Здесь фото, как массив
+        #win = dlib.image_window() # Если нужно выводить лицо на экран
         hog_list, hog_img = hog(image, orientations=8, pixels_per_cell=(16, 16), cells_per_block=(1, 1), block_norm='L1',
-                                visualize=True, feature_vector=True)
-        #imageio.imwrite(dir+"/"+filename.replace(".jpg","_hog.jpg"), hog_img)
-        #win.set_image(hog_img)
+                                visualize=True, feature_vector=True) # Генерируем hog изображение
+        #imageio.imwrite(dir+"/"+filename.replace(".jpg","_hog.jpg"), hog_img) # Если его нужно сохранить
+        #win.set_image(hog_img) # Вывод hog изображения
         #print(face_detector.detection_window_height)
-        face_pose_predictor = dlib.shape_predictor(predictor_model)
-        face_aligner = openface.AlignDlib(predictor_model)
-        detected_faces = face_detector(image, 1)
+        face_pose_predictor = dlib.shape_predictor(predictor_model) # Модель распознавания лица
+        face_aligner = openface.AlignDlib(predictor_model) # Это для выравнивания - сейчас не нужно, но в будушем может понадобится
+        detected_faces = face_detector(image, 1) # Находим лица, что такое "1" - не помню
 
         if len(detected_faces) == 0:
             print("Лица на фото не обнаружено")
@@ -49,13 +49,13 @@ for filename in os.listdir(dir):
         #win.set_image(image)
         #draw = ImageDraw.Draw(image1)
         # Loop through each face we found in the image
-        if len(detected_faces) == 1:
+        if len(detected_faces) == 1: # Если лицо одно, то продолжаем
             for i, face_rect in enumerate(detected_faces):
 
                 # Вывод контура лица
                 #print("- Face #{} found at Left: {} Top: {} Right: {} Bottom: {}".format(i, face_rect.left(), face_rect.top(), face_rect.right(), face_rect.bottom()))
 
-                # Вывод лица на экран прямоугольника
+                # Вывод лица на экран прямоугольника, если выводим на экран
                 #draw.rectangle(((face_rect.left(),face_rect.top()),(face_rect.right(),face_rect.bottom())))
                 #win.add_overlay(face_rect)
 
@@ -76,10 +76,10 @@ for filename in os.listdir(dir):
                     #draw.ellipse(((pose_landmarks.part(i).x,pose_landmarks.part(i).y),(pose_landmarks.part(i).x+5,pose_landmarks.part(i).y)+5), fill=128, outline="red")
                     #win.add_overlay_circle(pose_landmarks.part(i), 2)
 
-            #image1.save(dir+"/"+filename.replace(".jpg","_detect.jpg"))
+            #image1.save(dir+"/"+filename.replace(".jpg","_detect.jpg")) # Сохранение лица с метками точек
             #imageio.imwrite(dir+"/"+filename.replace(".jpg","_detect.jpg"), win)
 
-            prop = pose_landmarks.part(57).y - pose_landmarks.part(27).y
+            prop = pose_landmarks.part(57).y - pose_landmarks.part(27).y # Измеряем размер лица чтобы получить относительные размеры черт лица
 
             '''priznak[21]=detect.lips_gal(pose_landmarks, prop)
             priznak[22]=100-priznak[21]
@@ -112,8 +112,7 @@ for filename in os.listdir(dir):
             priznak[12] = 100-priznak[20]
             print("Близко-посаженные глаза: ", priznak[12])
             print("Широко-посаженные глаза: ", priznak[20])
-        # Wait until the user hits <enter> to close the window
-        #dlib.hit_enter_to_continue()
+
             priznak[16],priznak[17],priznak[18],priznak[19]=detect.eye_color(pose_landmarks, image1)
             print("Голубые глаза: ", priznak[16])
             print("Зеленые глаза: ", priznak[17])
@@ -133,3 +132,6 @@ for filename in os.listdir(dir):
             if priznak[41] < min: min = priznak[41]
 print("Максимум: ",max)
 print("Минимум: ",min)
+
+# Wait until the user hits <enter> to close the window
+# dlib.hit_enter_to_continue()
