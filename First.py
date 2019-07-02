@@ -8,7 +8,10 @@ from PIL import Image, ImageDraw
 from skimage import io
 from skimage.feature import hog
 
-priznak=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]  # Массив значений признаков
+priznak = []
+for i in range(1,63):  
+    priznak.append(0) # Массив значений признаков
+      
 max=0
 min=100
 predictor_model = "E:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
