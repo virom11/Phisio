@@ -1,22 +1,25 @@
 import sys
 import dlib
 import detect
+import detectEugene
 import os
-import openface
+#import openface
 import imageio
 from PIL import Image, ImageDraw
 from skimage import io
 from skimage.feature import hog
 
 priznak = []
-for i in range(1,63):  
-    priznak.append(0) # Массив значений признаков
-      
-max=0
-min=100
-predictor_model = "E:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
+for i in range(1, 63):
+    priznak.append(0)  # Массив значений признаков
 
-dir="D:/Dropbox/Студенты/Брови\Сросшиеся";
+
+
+max = 0
+min = 100
+predictor_model = "D:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
+
+dir="D:/Dropbox/Студенты/Брови/Темные густые"
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
     count=0 # Счетчик фоток в папке
     file_name=dir+"/"+filename
@@ -38,7 +41,7 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
         #win.set_image(hog_img) # Вывод hog изображения
         #print(face_detector.detection_window_height)
         face_pose_predictor = dlib.shape_predictor(predictor_model) # Модель распознавания лица
-        face_aligner = openface.AlignDlib(predictor_model) # Это для выравнивания - сейчас не нужно, но в будушем может понадобится
+        #face_aligner = openface.AlignDlib(predictor_model) # Это для выравнивания - сейчас не нужно, но в будушем может понадобится
         detected_faces = face_detector(image, 1) # Находим лица, что такое "1" - не помню
 
         if len(detected_faces) == 0:
@@ -129,14 +132,31 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             priznak[42] = detect.chin_form(pose_landmarks, prop)
             priznak[41] = 100 - priznak[42]
             print("Квадратный подбородок: ", priznak[41])
-            print("Круглый подбородок: ", priznak[42])'''
+            print("Круглый подбородок: ", priznak[42])
 
             priznak[8] = detect.eyebrows_accreted(pose_landmarks, image1)
             print("Сросшиеся брови: ", priznak[8])
             if priznak[8]>max: max=priznak[8]
             if priznak[8] < min: min = priznak[8]
-print("Максимум: ",max)
-print("Минимум: ",min)
+
+            priznak[3], priznak[4], priznak[5] = detectEugene.eyebrows(pose_landmarks, prop)
+            print("Бровин Домиком: ", priznak[3], "Бровин Полукругом: ", priznak[4], "Бровин Линией: ", priznak[5])
+
+            priznak[44] = detectEugene.fat_chin(pose_landmarks, image1)
+            print("Двойной подбородок: ", priznak[44])
+
+            priznak[6] = detectEugene.eyebrows_rise(pose_landmarks, prop)
+            print("Бровь с подъёмом: ", priznak[6])'''
+
+            priznak[7], priznak[9] = detectEugene.eyebrows_bold(pose_landmarks, image1)
+            print("Брови тёмные, густые:", priznak[9], "Брови светлые, редкие:", priznak[7])
+
+
+
+print("Максимум: ", max)
+print("Минимум: ", min)
+
+
 
 # Wait until the user hits <enter> to close the window
 # dlib.hit_enter_to_continue()
