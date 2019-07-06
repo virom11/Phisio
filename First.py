@@ -8,18 +8,21 @@ import imageio
 from PIL import Image, ImageDraw
 from skimage import io
 from skimage.feature import hog
+import numpy as np
+import math
 
 priznak = []
 for i in range(1, 63):
     priznak.append(0)  # Массив значений признаков
 
-
+average = 0
+count_ = 0
 
 max = 0
 min = 100
 predictor_model = "D:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
 
-dir="D:/Dropbox/Студенты/Брови/Темные густые"
+dir="D:/Dropbox/Студенты/Лоб/Широкий лоб"
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
     count=0 # Счетчик фоток в папке
     file_name=dir+"/"+filename
@@ -85,7 +88,8 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             #image1.save(dir+"/"+filename.replace(".jpg","_detect.jpg")) # Сохранение лица с метками точек
             #imageio.imwrite(dir+"/"+filename.replace(".jpg","_detect.jpg"), win)
 
-            prop = pose_landmarks.part(57).y - pose_landmarks.part(27).y # Измеряем размер лица чтобы получить относительные размеры черт лица
+            prop = math.sqrt((pose_landmarks.part(57).x - pose_landmarks.part(27).x) ** 2 +
+                             (pose_landmarks.part(57).y - pose_landmarks.part(27).y) ** 2)# Измеряем размер лица чтобы получить относительные размеры черт лица
 
             '''priznak[21]=detect.lips_gal(pose_landmarks, prop)
             priznak[22]=100-priznak[21]
@@ -143,13 +147,19 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             print("Бровин Домиком: ", priznak[3], "Бровин Полукругом: ", priznak[4], "Бровин Линией: ", priznak[5])
 
             priznak[44] = detectEugene.fat_chin(pose_landmarks, image1)
-            print("Двойной подбородок: ", priznak[44])
+            print("Раздвоенный подбородок: ", priznak[44])
 
             priznak[6] = detectEugene.eyebrows_rise(pose_landmarks, prop)
-            print("Бровь с подъёмом: ", priznak[6])'''
+            print("Бровь с подъёмом: ", priznak[6])
 
             priznak[7], priznak[9] = detectEugene.eyebrows_bold(pose_landmarks, image1)
             print("Брови тёмные, густые:", priznak[9], "Брови светлые, редкие:", priznak[7])
+            
+            priznak[32], priznak[34], priznak[55] = detectEugene.forhead_form(pose_landmarks, image1, prop) #круг, М, квадрат
+            print("Волосы лба Полукругом: ", priznak[32], " Буквой М: ", priznak[34], "Квадратный: ", priznak[55])
+            '''
+            priznak[35], priznak[56] = detectEugene.forhead_height(pose_landmarks, image1, prop)
+            print("Лоб Широкий: ", priznak[35], "Лоб Узкий: ", priznak[56])
 
 
 

@@ -3,83 +3,13 @@ import numpy as np
 import scipy
 import scipy.misc
 import scipy.cluster
-
-# Угол между линиями
-def dir_between(x1, y1, x2, y2, x3, y3, x4, y4):
-    k1 = (y2 - y1) / (x2 - x1)
-    k2 = (y4 - y3) / (x4 - x3)
-
-    a = 1
-    if (k1 * k2 + a) == 0:
-        a = 2
-    return math.degrees(math.atan(abs((k1 - k2) / (k1 * k2 + a))))
-
-
-# Средняя переменная (0, 37, 100)
-def clamp(val, small, big):
-    return max(small, min(val, big))
-
-
-# Взять цвет прямоугольника
-def get_color(min_x, max_x, min_y, max_y, image):
-    rs = 0
-    bs = 0
-    gs = 0
-    count = 0
-    for i in range(min_x, max_x):
-        for j in range(min_y, max_y):
-            r, g, b = image.getpixel((i, j))
-            rs += r
-            bs += b
-            gs += g
-            count += 1
-
-    return (rs + bs + gs) / count
-
-# Взять доминантный цвет
-def get_dom_color(min_x, max_x, min_y, max_y, image):
-    NUM_CLUSTERS = 1
-
-    area = (min_x, min_y, max_x, max_y)
-    cropped_img = image.crop(area)
-    ar = np.asarray(cropped_img)
-    shape = ar.shape
-    ar = ar.reshape(scipy.product(shape[:2]), shape[2]).astype(float)
-
-    codes, dist = scipy.cluster.vq.kmeans(ar, NUM_CLUSTERS)
-    print('cluster centres:\n', codes)
-
-    peak = codes[0]
-    return peak[0] + peak[1] + peak[2]
-
-# Расстояние между точками
-def vector_range(x1, y1, x2, y2):
-    return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
-
-
-# Насколько точка выше линии
-def lined(x, y, x1, y1, x2, y2):
-    return y - ((((x - x1) * (y2 - y1)) / (x2 - x1)) + y1)
-
-
-# Х, У, Радиус круга по трём точкам
-def rad_circle(x1, y1, x2, y2, x3, y3, scale):
-    x1, y1, x2, y2, x3, y3 = x1 * scale, y1 * scale, x2 * scale, y2 * scale, x3 * scale, y3 * scale
-    ma = (y2 - y1) / (x2 - x1)
-    mb = (y3 - y2) / (x3 - x2)
-
-    x = (ma * mb * (y1 - y3) + mb * (x1 + x2) - ma * (x2 + x3)) / (2 * (mb - ma))
-
-    if ma == 0:
-        ma += 1
-    ya = -(1 / (ma)) * (x - (x1 + x2) / 2) + (y1 + y2) / 2
-
-    return x, ya, vector_range(x, ya, x1, y1)
+from PIL import Image, ImageDraw
+from scriptsEugene import *
 
 
 # Домиком, Кругом, Линией
-def eyebrows(pose, scale_):
-    scale = 100 / scale_
+def eyebrows(pose, scale):
+    scale = 100 / scale
 
     dir1 = dir_between(pose.part(17).x, pose.part(17).y, pose.part(18).x, pose.part(18).y,
                        pose.part(21).x, pose.part(21).y, pose.part(19).x, pose.part(19).y)
@@ -109,7 +39,7 @@ def eyebrows(pose, scale_):
     return eye_house, eye_circle, eye_line
 
 
-# Жирный подбородок
+# Подбородок с ямкой
 def fat_chin(pose, image):
     hdist = (pose.part(8).x - pose.part(7).x)
     vdist = (pose.part(8).y - pose.part(57).y)
@@ -135,46 +65,93 @@ def fat_chin(pose, image):
 
 # Брови с подъёмом
 def eyebrows_rise(pose, scale):
-    rise1 = vector_range(pose.part(36).x, pose.part(36).y, pose.part(17).x, pose.part(17).y, )
-    near1 = vector_range(pose.part(39).x, pose.part(39).y, pose.part(21).x, pose.part(21).y, )
+	scale = 100 / scale
 
-    rise2 = vector_range(pose.part(45).x, pose.part(45).y, pose.part(26).x, pose.part(26).y, )
-    near2 = vector_range(pose.part(42).x, pose.part(42).y, pose.part(22).x, pose.part(22).y, )
+	rise1 = distance(pose.part(36).x, pose.part(36).y, pose.part(17).x, pose.part(17).y )
+	near1 = distance(pose.part(39).x, pose.part(39).y, pose.part(21).x, pose.part(21).y )
 
-    rise = (rise1 + rise2) / 2 * 100 / scale / 0.4
-    rise += ((rise - (near1 + near2) / 2) * 100 / scale - 50) / 4
+	rise2 = distance(pose.part(45).x, pose.part(45).y, pose.part(26).x, pose.part(26).y )
+	near2 = distance(pose.part(42).x, pose.part(42).y, pose.part(22).x, pose.part(22).y )
 
-    return clamp(rise, 0, 100)
+	rise = (rise1 + rise2) / 2 * scale / 0.4
+	rise += ((rise - (near1 + near2) / 2) * scale - 50) / 4
+
+	return clamp(rise, 0, 100)
 
 
 # Тёмные густые, Светлые редкие - Брови
 def eyebrows_bold(pose, image):
-    '''
-    min_x = min(pose.part(17).x, pose.part(18).x, pose.part(19).x, pose.part(20).x, pose.part(21).x)
-    max_x = max(pose.part(17).x, pose.part(18).x, pose.part(19).x, pose.part(20).x, pose.part(21).x)
-    min_y = min(pose.part(17).y, pose.part(18).y, pose.part(19).y, pose.part(20).y, pose.part(21).y)
-    max_y = max(pose.part(17).y, pose.part(18).y, pose.part(19).y, pose.part(20).y, pose.part(21).y)
-    '''
+    
+    #min_x = min(pose.part(17).x, pose.part(18).x, pose.part(19).x, pose.part(20).x, pose.part(21).x)
+    #max_x = max(pose.part(17).x, pose.part(18).x, pose.part(19).x, pose.part(20).x, pose.part(21).x)
+    #min_y = min(pose.part(17).y, pose.part(18).y, pose.part(19).y, pose.part(20).y, pose.part(21).y)
+    #max_y = max(pose.part(17).y, pose.part(18).y, pose.part(19).y, pose.part(20).y, pose.part(21).y)
+    
 
     min_x = min(pose.part(18).x, pose.part(19).x)
     max_x = max(pose.part(18).x, pose.part(19).x) + 1
     min_y = min(pose.part(18).y, pose.part(19).y)
     max_y = min_y + (pose.part(28).y - pose.part(27).y)
 
-    eyebrows_color1 = get_dom_color(min_x, max_x, min_y, max_y, image)
+    eyebrows_color1 = get_dominate_color(min_x, max_x, min_y, max_y, image)
 
     min_x = min(pose.part(24).x, pose.part(25).x)
     max_x = max(pose.part(24).x, pose.part(25).x) + 1
     min_y = min(pose.part(24).y, pose.part(25).y)
     max_y = min_y + (pose.part(28).y - pose.part(27).y)
 
-    eyebrows_color2 = get_dom_color(min_x, max_x, min_y, max_y, image)
+    eyebrows_color2 = get_dominate_color(min_x, max_x, min_y, max_y, image)
 
     light_rare = ((eyebrows_color1 + eyebrows_color2) / 2 - 100) / 4
     light_rare = clamp(light_rare, 0, 100)
     bold_often = 100 - light_rare
 
     return light_rare, bold_often
+
+
+# Форма лица
+def forhead_form(pose, image, scale):
+	"""
+	dir1 = dir_between(pose.part(2).x, pose.part(2).y, pose.part(4).x, pose.part(4).y, 
+										pose.part(14).x, pose.part(14).y, pose.part(12).x, pose.part(12).y)
+
+	dir2 = dir_between(pose.part(5).x, pose.part(5).y, pose.part(7).x, pose.part(7).y, 
+										pose.part(11).x, pose.part(11).y, pose.part(9).x, pose.part(9).y)
+
+	if dir2 > 73 or dir1 > 40:
+		result = "Огонь"
+	else:
+		result = "Вода"
+
+	if (dir2 / 2) - (dir2 / 14) > dir1:
+		result = "Ветер" 
+	"""
+	forhead = [0, 0, 0]
+	forhead[0], forhead[1], forhead[2] = add_forehead(pose, image, scale)
+
+	if forhead[1].length == 16:
+		return "Лоб слишком тёмный, либо неправильный угол", "", ""
+
+	distance = lined(forhead[1].x, forhead[1].y, forhead[0].x, forhead[0].y, forhead[2].x, forhead[2].y) * 100/scale
+
+	fh_M = clamp((distance + 100) / 2, 0, 100)
+	fh_circle = clamp(100 - fh_M * (1 + (100 - fh_M) / 100), 0, 100)
+	fh_square = 100 - clamp(abs(distance) * 2, 0, 100)
+
+	return fh_circle, fh_M, fh_square
+
+def forhead_height(pose, image, scale):
+	forhead = [0, 0, 0]
+	forhead[0], forhead[1], forhead[2] = add_forehead(pose, image, scale)
+
+	if forhead[1].length == 16:
+		return "Лоб слишком тёмный, либо неправильный угол", "Лоб слишком тёмный, либо неправильный угол"
+
+	height = forhead[1].length
+	wide = clamp((height - 50) * 1.67, 0, 100)
+	narrow = 100 - wide
+
+	return wide, narrow
 
 """
 from __future__ import print_function
