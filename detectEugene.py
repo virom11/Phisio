@@ -172,11 +172,11 @@ def face_form(pose, image, scale):
 
 	dist1, dist2, dist3, dist4 = dist1 * 100/scale, dist2 * 100/scale, dist3 * 100/scale, dist4 * 100/scale
 
-	water = ((dist1 + dist2 + dist3)/3 - 130) * 2, 0, 100
+	water = ((dist1 + dist2 + dist3)/3 - 130) * 2
 
-	wind = 100 - abs(dist3 - dist1) * 6, 0, 100
+	wind = 100 - abs(dist3 - dist1) * 6
 
-	fire = mean_square(100 - (dist1 - 130) * 2.5, (dist1 - dist3 + 30) * 1.67, 0, 100)
+	fire = mean_square(100 - (dist1 - 130) * 2.5, (dist1 - dist3 + 30) * 1.67)
 
 	if forhead[1].length != 16:
 		water *= dist2 / dist4
