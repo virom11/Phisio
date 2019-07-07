@@ -4,6 +4,9 @@ import scipy
 import scipy.misc
 import scipy.cluster
 from PIL import Image, ImageDraw
+from colormath.color_objects import sRGBColor, LabColor
+from colormath.color_conversions import convert_color
+from colormath.color_diff import delta_e_cie2000
 
 # Угол между линиями
 def dir_between(x1, y1, x2, y2, x3, y3, x4, y4):
@@ -118,30 +121,43 @@ class Forehead(object):
 		length = 0
 
     # The class "constructor" - It actually an initializer 
-		def __init__(self, pose, image, scale, pose_number, percent = 140, length = 15):
-
-			imageBW = black_white(image, percent)
-			dir_ = point_direction(pose.part(29).x, pose.part(29).y, pose.part(27).x, pose.part(27).y)
+		def __init__(self, pose, image, scale, pose_number):
 
 			# Создание точкек лба
+			x, y, length = add_point_forehead(pose, image, scale, pose_number)
 
-			lendir_x, lendir_y = lengthDir(scale/100, dir_)
-
-			x = pose.part(pose_number).x +  length * lendir_x
-			y = pose.part(pose_number).y +  length * lendir_y
-
-			while True:
-					x += lendir_x
-					y += lendir_y
-					length += 1
-
-					white = imageBW.getpixel((x, y))
-					if white == 0:
-						break
+			i = 150
+			while length == 16:
+				x, y, length = add_point_forehead(pose, image, scale, pose_number, i)
+				i += 5
+				if i == 230:
+					break
 
 			self.x = x
 			self.y = y
 			self.length = length
+
+
+
+def add_point_forehead(pose, image, scale, pose_number, percent = 140, length = 15):
+
+	imageBW = black_white(image, percent)
+	dir_ = point_direction(pose.part(29).x, pose.part(29).y, pose.part(27).x, pose.part(27).y)
+
+	lendir_x, lendir_y = lengthDir(scale/100, dir_)
+
+	x = pose.part(pose_number).x +  length * lendir_x
+	y = pose.part(pose_number).y +  length * lendir_y
+
+	while True:
+			x += lendir_x
+			y += lendir_y
+			length += 1
+
+			white = imageBW.getpixel((x, y))
+			if white == 0:
+				break
+	return x, y, length
 
 
 # Добавляем 3 ебаных блять точки, ведь нейросеть не может блеат
@@ -150,14 +166,52 @@ def add_forehead(pose, image, scale):
 	forh_0 = Forehead(pose, image, scale, 19)
 	forh_2 = Forehead(pose, image, scale, 24)
 
-	percent = 150
-	while (forh_center.length == 16) :
-		forh_center = Forehead(pose, image, scale, 27, percent)
-		forh_0 = Forehead(pose, image, scale, 19, percent)
-		forh_2 = Forehead(pose, image, scale, 24, percent)
-		percent += 5
-		if percent == 255:
-			break
-
 	return forh_0, forh_center, forh_2
 
+
+# Скрипт для длины бровей
+def eyebrows_height_1(pose, image, scale, pose_number1 = 20, pose_number2 = 38):
+	dir_ = point_direction(pose.part(27).x, pose.part(27).y, pose.part(29).x, pose.part(29).y)
+
+	lendir_x, lendir_y = lengthDir(scale/100, dir_)
+
+	length = 2
+	summ = 0
+	average = 0
+
+	x = pose.part(pose_number1).x +  length * lendir_x
+	y = pose.part(pose_number1).y +  length * lendir_y
+
+	r, g, b = image.getpixel((x, y))
+	color2_rgb = sRGBColor(r / 255, g / 255, b / 255);
+
+	for i in range(pose.part(pose_number1).y, pose.part(pose_number2).y):
+		r, g, b = image.getpixel((x, y))
+		# Red Color
+		color1_rgb = sRGBColor(r / 255, g / 255, b / 255);
+
+		# Convert from RGB to Lab Color Space
+		color1_lab = convert_color(color1_rgb, LabColor);
+
+		# Convert from RGB to Lab Color Space
+		color2_lab = convert_color(color2_rgb, LabColor);
+
+		# Find the color difference
+		delta_e = delta_e_cie2000(color1_lab, color2_lab);
+
+		print ("The difference between the 2 color = ", delta_e)
+
+		if length > 4:
+			if (delta_e > average * 5 + 1) or (delta_e > 10):
+				break
+
+		summ += delta_e
+		length += 1
+		average = summ / (length - 2)
+
+		color2_rgb = color1_rgb
+
+		x += lendir_x
+		y += lendir_y
+
+	return length

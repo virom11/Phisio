@@ -4,6 +4,10 @@ import scipy
 import scipy.misc
 import scipy.cluster
 from PIL import Image, ImageDraw
+from colormath.color_objects import sRGBColor, LabColor
+from colormath.color_conversions import convert_color
+from colormath.color_diff import delta_e_cie2000
+
 from scriptsEugene import *
 
 
@@ -109,23 +113,9 @@ def eyebrows_bold(pose, image):
     return light_rare, bold_often
 
 
-# Форма лица
+# Форма волос лба
 def forhead_form(pose, image, scale):
-	"""
-	dir1 = dir_between(pose.part(2).x, pose.part(2).y, pose.part(4).x, pose.part(4).y, 
-										pose.part(14).x, pose.part(14).y, pose.part(12).x, pose.part(12).y)
-
-	dir2 = dir_between(pose.part(5).x, pose.part(5).y, pose.part(7).x, pose.part(7).y, 
-										pose.part(11).x, pose.part(11).y, pose.part(9).x, pose.part(9).y)
-
-	if dir2 > 73 or dir1 > 40:
-		result = "Огонь"
-	else:
-		result = "Вода"
-
-	if (dir2 / 2) - (dir2 / 14) > dir1:
-		result = "Ветер" 
-	"""
+	
 	forhead = [0, 0, 0]
 	forhead[0], forhead[1], forhead[2] = add_forehead(pose, image, scale)
 
@@ -140,18 +130,38 @@ def forhead_form(pose, image, scale):
 
 	return fh_circle, fh_M, fh_square
 
+
+# Высота лба
 def forhead_height(pose, image, scale):
 	forhead = [0, 0, 0]
 	forhead[0], forhead[1], forhead[2] = add_forehead(pose, image, scale)
 
 	if forhead[1].length == 16:
-		return "Лоб слишком тёмный, либо неправильный угол", "Лоб слишком тёмный, либо неправильный угол"
+		return "Лоб слишком тёмный", "Лоб слишком тёмный"
 
 	height = forhead[1].length
 	wide = clamp((height - 50) * 1.67, 0, 100)
 	narrow = 100 - wide
 
 	return wide, narrow
+
+
+# Высота бровей
+def eyebrows_height(pose, image, scale):
+
+	length1 = eyebrows_height_1(pose, image, scale, 20, 38)
+	length2 = eyebrows_height_1(pose, image, scale, 23, 43)
+
+	length = (length1 + length2) / 2
+	
+	if length in range(10, 17):
+		length = clamp(50 * (1 + (length - 13) / 100), 0, 100)
+	else:
+		length = clamp((length - 5) * 5.8, 0, 100)
+
+	return 100 - length, length
+
+
 
 """
 from __future__ import print_function
@@ -162,79 +172,4 @@ import scipy
 import scipy.misc
 import scipy.cluster
 import math
-
-
-def eyebrows_accreted_upd(pose_landmarks, im):
-    NUM_CLUSTERS = 1
-    eyebrows_color = [0, 0, 0]
-    nose_color = [0, 0, 0]
-    goal_color = [0, 0, 0]
-
-    # <editor-fold desc="eyebrows_color">
-    min_x = min(pose_landmarks.part(18).x, pose_landmarks.part(20).x)
-    max_x = max(pose_landmarks.part(18).x, pose_landmarks.part(20).x) + 1
-    min_y = min(pose_landmarks.part(18).y, pose_landmarks.part(20).y)
-    max_y = max(pose_landmarks.part(18).y, pose_landmarks.part(20).y) + 1
-
-    area = (min_x, min_y, max_x, max_y)
-    cropped_img = im.crop(area)
-    ar = np.asarray(cropped_img)
-    shape = ar.shape
-    ar = ar.reshape(scipy.product(shape[:2]), shape[2]).astype(float)
-
-    codes, dist = scipy.cluster.vq.kmeans(ar, NUM_CLUSTERS)
-    print('cluster centres:\n', codes)
-
-    peak = codes[0]
-    eyebrows_color[0], eyebrows_color[1], eyebrows_color[2] = peak[0], peak[1], peak[2]
-    # </editor-fold>
-
-    # <editor-fold desc="nose_color">
-    min_x = min(pose_landmarks.part(21).x, pose_landmarks.part(22).x)
-    max_x = max(pose_landmarks.part(21).x, pose_landmarks.part(22).x) + 1
-    max_y = max(pose_landmarks.part(20).y, pose_landmarks.part(23).y) + 1
-    min_y = max_y - (pose_landmarks.part(27).y - max_y)
-
-    area = (min_x, min_y, max_x, max_y)
-    cropped_img = im.crop(area)
-    ar = np.asarray(cropped_img)
-    shape = ar.shape
-    ar = ar.reshape(scipy.product(shape[:2]), shape[2]).astype(float)
-
-    codes, dist = scipy.cluster.vq.kmeans(ar, NUM_CLUSTERS)
-    print('cluster centres:\n', codes)
-
-    peak = codes[0]
-    nose_color[0], nose_color[1], nose_color[2] = peak[0], peak[1], peak[2]
-
-    # </editor-fold>
-
-    # <editor-fold desc="goal_color">
-    min_x = min(pose_landmarks.part(21).x, pose_landmarks.part(22).x)
-    max_x = max(pose_landmarks.part(21).x, pose_landmarks.part(22).x) + 1
-    min_y = min(pose_landmarks.part(21).y,pose_landmarks.part(22).y)
-    max_y = round((pose_landmarks.part(27).y - min_y) / 2) + min_y
-
-    area = (min_x, min_y, max_x, max_y)
-    cropped_img = im.crop(area)
-    ar = np.asarray(cropped_img)
-    shape = ar.shape
-    ar = ar.reshape(scipy.product(shape[:2]), shape[2]).astype(float)
-
-    codes, dist = scipy.cluster.vq.kmeans(ar, NUM_CLUSTERS)
-    print('cluster centres:\n', codes)
-
-    peak = codes[0]
-    goal_color[0], goal_color[1], goal_color[2] = peak[0], peak[1], peak[2]
-
-    # </editor-fold>
-
-    for i in range(0, 3):
-        min_diff = min(eyebrows_color[i], nose_color[i])
-        eyebrows_color[i], nose_color[i], goal_color[i] = eyebrows_color[i] - min_diff, nose_color[i] - min_diff, goal_color[i] - min_diff
-        max_100 = max(eyebrows_color[i], nose_color[i])
-        goal_color[i] = goal_color[i] / max_100 * 100
-
-
-
-    return 100 - (goal_color[0] + goal_color[0] + goal_color[0])/3"""
+"""

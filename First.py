@@ -15,14 +15,11 @@ priznak = []
 for i in range(1, 63):
     priznak.append(0)  # Массив значений признаков
 
-average = 0
-count_ = 0
-
 max = 0
 min = 100
 predictor_model = "D:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
 
-dir="D:/Dropbox/Студенты/Лоб/Широкий лоб"
+dir="D:/Dropbox/Студенты/Брови/Домиком"
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
     count=0 # Счетчик фоток в папке
     file_name=dir+"/"+filename
@@ -157,10 +154,13 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             
             priznak[32], priznak[34], priznak[55] = detectEugene.forhead_form(pose_landmarks, image1, prop) #круг, М, квадрат
             print("Волосы лба Полукругом: ", priznak[32], " Буквой М: ", priznak[34], "Квадратный: ", priznak[55])
-            '''
+            
             priznak[35], priznak[56] = detectEugene.forhead_height(pose_landmarks, image1, prop)
             print("Лоб Широкий: ", priznak[35], "Лоб Узкий: ", priznak[56])
-
+            
+            priznak[10], priznak[11] = detectEugene.eyebrows_height(pose_landmarks, image1, prop)
+            print("Тонкие брови: ", priznak[10], " Широкие брови: ", priznak[11])
+            '''
 
 
 print("Максимум: ", max)
