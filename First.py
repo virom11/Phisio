@@ -15,16 +15,11 @@ priznak = []
 for i in range(1, 63):
     priznak.append(0)  # Массив значений признаков
 
-average1 = 0
-average2 = 0
-average3 = 0
-count_ = 0
-
 max = 0
 min = 100
-predictor_model = "C:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
+predictor_model = "D:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
 
-dir="C:/Dropbox/Студенты/Форма лица/Огонь"
+dir="D:/Dropbox/Студенты/Форма лица/Огонь"
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
     count=0 # Счетчик фоток в папке
     file_name=dir+"/"+filename
@@ -169,15 +164,6 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             priznak[51], priznak[52], priznak[53] = detectEugene.face_form(pose_landmarks, image1, prop)
             print("Вода на: "priznak[51]," Ветер на: " priznak[52]," Огонь на: ", priznak[53])
 
-            average1 += priznak[51]
-            average2 += priznak[52]
-            average3 += priznak[53]
-            count_ += 1
-            print(count_)
-
-            if count_ == 25:
-                average1, average2, average3 = average1 / count_, average2 / count_, average3 / count_
-                print(average1, average2, average3)
 
 
 print("Максимум: ", max)
