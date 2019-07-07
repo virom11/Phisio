@@ -23,6 +23,12 @@ def dir_between(x1, y1, x2, y2, x3, y3, x4, y4):
 	return math.degrees(math.atan(abs((k1 - k2) / (k1 * k2 + a))))
 
 
+def mean_square(a, b, c = -1):
+	if c == -1:
+		return math.sqrt((a**2 + b**2) / 2)
+	else:
+		return math.sqrt((a**2 + b**2 + c**2) / 3)
+
 # Средняя переменная f. e. (0, 37, 100)
 def clamp(val, small, big):
     return max(small, min(val, big))
@@ -121,43 +127,30 @@ class Forehead(object):
 		length = 0
 
     # The class "constructor" - It actually an initializer 
-		def __init__(self, pose, image, scale, pose_number):
+		def __init__(self, pose, image, scale, pose_number, length = 15):
 
 			# Создание точкек лба
-			x, y, length = add_point_forehead(pose, image, scale, pose_number)
+			imageBW = black_white(image, 140)
+			dir_ = point_direction(pose.part(29).x, pose.part(29).y, pose.part(27).x, pose.part(27).y)
 
-			i = 150
-			while length == 16:
-				x, y, length = add_point_forehead(pose, image, scale, pose_number, i)
-				i += 5
-				if i == 230:
+			lendir_x, lendir_y = lengthDir(scale/100, dir_)
+
+			x = pose.part(pose_number).x +  length * lendir_x
+			y = pose.part(pose_number).y +  length * lendir_y
+
+			while True:
+				x += lendir_x
+				y += lendir_y
+				length += 1
+
+				white = imageBW.getpixel((x, y))
+				if white == 0:
 					break
 
 			self.x = x
 			self.y = y
 			self.length = length
 
-
-
-def add_point_forehead(pose, image, scale, pose_number, percent = 140, length = 15):
-
-	imageBW = black_white(image, percent)
-	dir_ = point_direction(pose.part(29).x, pose.part(29).y, pose.part(27).x, pose.part(27).y)
-
-	lendir_x, lendir_y = lengthDir(scale/100, dir_)
-
-	x = pose.part(pose_number).x +  length * lendir_x
-	y = pose.part(pose_number).y +  length * lendir_y
-
-	while True:
-			x += lendir_x
-			y += lendir_y
-			length += 1
-
-			white = imageBW.getpixel((x, y))
-			if white == 0:
-				break
-	return x, y, length
 
 
 # Добавляем 3 ебаных блять точки, ведь нейросеть не может блеат

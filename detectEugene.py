@@ -161,7 +161,29 @@ def eyebrows_height(pose, image, scale):
 
 	return 100 - length, length
 
+def face_form(pose, image, scale):
+	forhead = [0, 0, 0]
+	forhead[0], forhead[1], forhead[2] = add_forehead(pose, image, scale)
 
+	dist1 = distance(pose.part(17).x, pose.part(17).y, pose.part(26).x, pose.part(26).y)
+	dist2 = distance(pose.part(1).x, pose.part(1).y, pose.part(15).x, pose.part(15).y)
+	dist3 = distance(pose.part(4).x, pose.part(4).y, pose.part(12).x, pose.part(12).y)
+	dist4 = distance(pose.part(5).x, pose.part(5).y, forhead[1].x, forhead[1].y)
+
+	dist1, dist2, dist3, dist4 = dist1 * 100/scale, dist2 * 100/scale, dist3 * 100/scale, dist4 * 100/scale
+
+	water = ((dist1 + dist2 + dist3)/3 - 130) * 2, 0, 100
+
+	wind = 100 - abs(dist3 - dist1) * 6, 0, 100
+
+	fire = mean_square(100 - (dist1 - 130) * 2.5, (dist1 - dist3 + 30) * 1.67, 0, 100)
+
+	if forhead[1].length != 16:
+		water *= dist2 / dist4
+		wind *= dist4 / dist2
+		fire *= (50 - abs(dist2 - dist4) * 5) / 100 + 1
+
+	return clamp(water, 0, 100), clamp(wind, 0, 100), clamp(fire, 0, 100)
 
 """
 from __future__ import print_function
