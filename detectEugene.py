@@ -161,6 +161,8 @@ def eyebrows_height(pose, image, scale):
 
 	return 100 - length, length
 
+
+# Форма лица
 def face_form(pose, image, scale):
 	forhead = [0, 0, 0]
 	forhead[0], forhead[1], forhead[2] = add_forehead(pose, image, scale)
@@ -184,6 +186,27 @@ def face_form(pose, image, scale):
 		fire *= (50 - abs(dist2 - dist4) * 5) / 100 + 1
 
 	return clamp(water, 0, 100), clamp(wind, 0, 100), clamp(fire, 0, 100)
+
+
+# Миры
+def worlds(pose, image, scale):
+	forhead = [0, 0, 0]
+	forhead[0], forhead[1], forhead[2] = add_forehead(pose, image, scale)
+
+	pose_brows_y = (pose.part(24).y + pose.part(19).y) / 2
+
+	material = distance(pose.part(8).x, pose.part(8).y, pose.part(30).x, pose.part(30).y) * 100/scale * 0.75
+	family = distance(pose.part(30).x, pose.part(30).y, pose.part(27).x, pose_brows_y) * 100/scale * 0.8
+
+	if forhead[1].length != 16:
+		spiritual = distance(pose.part(27).x, pose_brows_y, forhead[1].x, forhead[1].y) * 100/scale * 0.85
+	else:
+		spiritual = "Лоб слишком тёмный,"
+
+	return spiritual, material, family
+	
+
+
 
 """
 from __future__ import print_function
