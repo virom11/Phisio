@@ -146,7 +146,7 @@ def forhead_height(pose, image, scale):
 	return wide, narrow
 
 
-# Высота бровей
+# Размер бровей
 def eyebrows_height(pose, image, scale):
 
 	length1 = eyebrows_height_1(pose, image, scale, 20, 38)
@@ -203,10 +203,25 @@ def worlds(pose, image, scale):
 	else:
 		spiritual = "Лоб слишком тёмный,"
 
-	return spiritual, material, family
+	return clamp(spiritual, 0, 100), clamp(material, 0, 100), clamp(family, 0, 100)
 	
 
+# Размер уха
+def ear_size(pose, image, scale):
 
+	length1 = ear_size_1(pose, image, scale, 1)
+	length2 = ear_size_1(pose, image, scale, 15)
+
+	if length1 == 50:
+		length1 = 0
+	if length2 == 50:
+		length2 = 0
+
+	length = max(length1, length2)
+
+	length = clamp((length - 3) * 3.3, 0, 100)
+
+	return length, 100 - length
 
 """
 from __future__ import print_function

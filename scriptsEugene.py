@@ -208,3 +208,52 @@ def eyebrows_height_1(pose, image, scale, pose_number1 = 20, pose_number2 = 38):
 		y += lendir_y
 
 	return length
+
+def ear_size_1(pose, image, scale, pose_number = 1):
+	dir_ = point_direction(pose.part(28).x, pose.part(28).y, pose.part(pose_number).x, pose.part(pose_number).y)
+
+	lendir_x, lendir_y = lengthDir(scale/100, dir_)
+
+	length = 0
+	summ = 0
+	average = 0
+
+	x = pose.part(pose_number).x +  length * lendir_x
+	y = pose.part(pose_number).y +  length * lendir_y
+
+	r, g, b = image.getpixel((x, y))
+	color2_rgb = sRGBColor(r / 255, g / 255, b / 255);
+
+	for i in range(0, 50):
+		try:
+			r, g, b = image.getpixel((x, y))
+		except:
+			return 0
+		# Red Color
+		color1_rgb = sRGBColor(r / 255, g / 255, b / 255);
+
+		# Convert from RGB to Lab Color Space
+		color1_lab = convert_color(color1_rgb, LabColor);
+
+		# Convert from RGB to Lab Color Space
+		color2_lab = convert_color(color2_rgb, LabColor);
+
+		# Find the color difference
+		delta_e = delta_e_cie2000(color1_lab, color2_lab);
+
+		#print ("The difference between the 2 color = ", delta_e)
+
+		if length > 2:
+			if (delta_e > average * 5 + 1) or (delta_e > 14):
+				break
+
+		summ += delta_e
+		length += 1
+		average = summ / (length)
+
+		color2_rgb = color1_rgb
+
+		x += lendir_x
+		y += lendir_y
+
+	return length

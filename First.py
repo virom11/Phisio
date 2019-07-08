@@ -12,7 +12,7 @@ import numpy as np
 import math
 
 priznak = []
-for i in range(1, 63):
+for i in range(0, 65):
     priznak.append(0)  # Массив значений признаков
 
 count_ = 0
@@ -21,7 +21,7 @@ max = 0
 min = 100
 predictor_model = "D:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
 
-dir="D:/Dropbox/Студенты/Миры/Духовный"
+dir="D:/Dropbox/Студенты/Уши/Прижатые уши"
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
     count=0 # Счетчик фоток в папке
     file_name=dir+"/"+filename
@@ -165,13 +165,15 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             
             priznak[51], priznak[52], priznak[53] = detectEugene.face_form(pose_landmarks, image1, prop)
             print("Вода на: ", priznak[51]," Ветер на: ", priznak[52]," Огонь на: ", priznak[53])
-            '''
+            
             priznak[57], priznak[58], priznak[59] = detectEugene.worlds(pose_landmarks, image1, prop)
             print("Духовный : ", priznak[57]," Материальный: ", priznak[58]," Семейный: ", priznak[59])
+            '''
+            priznak[50], priznak[64] = detectEugene.ear_size(pose_landmarks, image1, prop)
+            print("Лопоухий: ", priznak[50], "Прижатые уши: ", priznak[64])
 
             count_ += 1
             print(count_)
-
 
 
 print("Максимум: ", max)
