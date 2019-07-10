@@ -11,6 +11,9 @@ from skimage.feature import hog
 import numpy as np
 import math
 
+ubuntu = False #Эта переменная используется для разработки на Ubuntu. 
+#Чтобы отключить подгон кода под особенности Ubuntu присвойте данной перменной значение False.
+
 priznak = []
 for i in range(0, 65):
     priznak.append(0)  # Массив значений признаков
@@ -19,9 +22,18 @@ count_ = 0
 
 max = 0
 min = 100
-predictor_model = "D:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
 
-dir="D:/Dropbox/Студенты/Уши/Прижатые уши"
+if(ubuntu):
+    print('Ubuntu is used now')
+    predictor_model = "/home/vector/Documents/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
+else:
+    predictor_model = "D:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
+
+if(ubuntu):
+    dir="/home/vector/Documents/Скулы на уровне глаз"
+else:
+    dir="D:/Dropbox/Студенты/Уши/Прижатые уши"
+
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
     count=0 # Счетчик фоток в папке
     file_name=dir+"/"+filename
