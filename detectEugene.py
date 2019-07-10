@@ -208,14 +208,15 @@ def worlds(pose, image, scale):
 
 # Размер уха
 def ear_size(pose, image, scale):
+	ear = [0, 0, 0, 0]
+	ear[0], ear[1], ear[2], ear[3] = add_ear(pose, image, scale)
 
-	length1 = ear_size_1(pose, image, scale, 1)
-	length2 = ear_size_1(pose, image, scale, 15)
+	length1 = ear[0].length
+	length2 = ear[0].length
 
-	if length1 == 50:
-		length1 = 0
-	if length2 == 50:
-		length2 = 0
+
+	if (ear[0].x == 0) or (ear[1].x == 0):
+		return "Фотография неправильного формата", "Фотография неправильного формата"
 
 	length = max(length1, length2)
 
@@ -223,13 +224,22 @@ def ear_size(pose, image, scale):
 
 	return length, 100 - length
 
-"""
-from __future__ import print_function
-import binascii
-import struct
-import numpy as np
-import scipy
-import scipy.misc
-import scipy.cluster
-import math
-"""
+
+
+def ear_script(pose, image, scale):
+	ear = [0, 0, 0, 0]
+	ear[0], ear[1], ear[2], ear[3] = add_ear(pose, image, scale)
+
+	if (ear[0].x != pose.part(1).x) and (ear[0].x != 0):
+		x = (ear[0].x + pose.part(1).x) / 2
+		y = (ear[0].y + pose.part(1).y) / 2
+		
+		length1 = ear_height(pose, image, scale, x, y) 
+
+	if (ear[2].x != pose.part(15).x) and (ear[2].x != 0):
+		x = (ear[2].x + pose.part(15).x) / 2
+		y = (ear[2].y + pose.part(15).y) / 2
+		
+		length2 = ear_height(pose, image, scale, x, y) 
+
+	return max(length1, length2), max(ear[0].length - ear[2].length, ear[1].length - ear[3].length)
