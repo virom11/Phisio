@@ -6,6 +6,7 @@ import sys
 import dlib
 import detect
 import detectEugene
+import detectVector
 import os
 import openface
 import imageio
@@ -187,6 +188,9 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             '''
             priznak[50], priznak[64] = detectEugene.ear_size(pose_landmarks, image1, prop)
             print("Лопоухий: ", priznak[50], "Прижатые уши: ", priznak[64])
+
+            #priznak[1], priznak[2] = detectVector.asymmetry(pose_landmarks, image1, prop, predictor_model, file_name)
+            #print("Ассиметрия в правую сторону: ", priznak[51], "Ассиметрия в левую сторону: ", priznak[2])
 
             count_ += 1
             print(count_)
