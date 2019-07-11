@@ -1,9 +1,13 @@
+#! /usr/bin/env python 
+# -*- coding: utf-8 -*-
+#Строки для корректной работы с киррилицей в python. Работают даже в закоментированном состоянии
+
 import sys
 import dlib
 import detect
 import detectEugene
 import os
-#import openface
+import openface
 import imageio
 from PIL import Image, ImageDraw
 from skimage import io
@@ -37,7 +41,7 @@ else:
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
     count=0 # Счетчик фоток в папке
     file_name=dir+"/"+filename
-    print(file_name)
+    print("File name is: " + file_name)
     if (file_name.endswith("_hog.jpg")==0) and (file_name.endswith("_detect.jpg")==0):  # Работаем только с оригиналом фото, не hog и не распознанное
         count=count+1
         #file_name = 'E:/567.jpg'
