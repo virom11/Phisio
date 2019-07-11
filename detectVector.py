@@ -16,3 +16,7 @@ import scriptsVector
 
 def asymmetry(pose, image, scale, predictor_model,file_name,):
     scriptsVector.face_aligner_func(predictor_model,file_name)
+
+
+    
+    return 0, 100

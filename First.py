@@ -42,8 +42,8 @@ else:
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
     count=0 # Счетчик фоток в папке
     file_name=dir+"/"+filename
-    print("File name is: " + file_name)
     if (file_name.endswith("_hog.jpg")==0) and (file_name.endswith("_detect.jpg")==0):  # Работаем только с оригиналом фото, не hog и не распознанное
+        print("File name is: " + file_name)
         count=count+1
         #file_name = 'E:/567.jpg'
         #file_name = 'D:/Dropbox/Студенты/Губы/Уголки губ вниз/331919_parni_iz_seriala_dnevniki_vampira.jpg';
@@ -53,6 +53,7 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
         image1 = Image.open(file_name) # Здесь откроет фото
         # Load the image into an array
         image = io.imread(file_name) # Здесь фото, как массив
+        print(image)
         #win = dlib.image_window() # Если нужно выводить лицо на экран
         hog_list, hog_img = hog(image, orientations=8, pixels_per_cell=(16, 16), cells_per_block=(1, 1), block_norm='L1',
                                 visualize=True, feature_vector=True) # Генерируем hog изображение
@@ -186,11 +187,12 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             priznak[57], priznak[58], priznak[59] = detectEugene.worlds(pose_landmarks, image1, prop)
             print("Духовный : ", priznak[57]," Материальный: ", priznak[58]," Семейный: ", priznak[59])
             '''
-            priznak[50], priznak[64] = detectEugene.ear_size(pose_landmarks, image1, prop)
-            print("Лопоухий: ", priznak[50], "Прижатые уши: ", priznak[64])
+            #priznak[50], priznak[64] = detectEugene.ear_size(pose_landmarks, image1, prop)
+            #print("Лопоухий: ", priznak[50], "Прижатые уши: ", priznak[64])
 
-            #priznak[1], priznak[2] = detectVector.asymmetry(pose_landmarks, image1, prop, predictor_model, file_name)
-            #print("Ассиметрия в правую сторону: ", priznak[51], "Ассиметрия в левую сторону: ", priznak[2])
+            priznak[1], priznak[2] = detectVector.asymmetry(pose_landmarks, image1, prop, predictor_model, file_name)
+            print("Ассиметрия в правую сторону: ", priznak[51], "Ассиметрия в левую сторону: ", priznak[2])
+
 
             count_ += 1
             print(count_)
