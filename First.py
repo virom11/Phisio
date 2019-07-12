@@ -16,7 +16,7 @@ from skimage.feature import hog
 import numpy as np
 import math
 
-ubuntu = True #Эта переменная используется для разработки на Ubuntu. 
+ubuntu = False #Эта переменная используется для разработки на Ubuntu. 
 #Чтобы отключить подгон кода под особенности Ubuntu присвойте данной перменной значение False.
 
 priznak = []
@@ -187,11 +187,11 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             priznak[57], priznak[58], priznak[59] = detectEugene.worlds(pose_landmarks, image1, prop)
             print("Духовный : ", priznak[57]," Материальный: ", priznak[58]," Семейный: ", priznak[59])
             '''
-            #priznak[50], priznak[64] = detectEugene.ear_size(pose_landmarks, image1, prop)
-            #print("Лопоухий: ", priznak[50], "Прижатые уши: ", priznak[64])
+            priznak[50], priznak[64] = detectEugene.ear_size(pose_landmarks, image1, prop)
+            print("Лопоухий: ", priznak[50], "Прижатые уши: ", priznak[64])
 
-            priznak[1], priznak[2] = detectVector.asymmetry(predictor_model, file_name)
-            print("Ассиметрия в правую сторону: ", priznak[1], "Ассиметрия в левую сторону: ", priznak[2])
+            #priznak[1], priznak[2] = detectVector.asymmetry(predictor_model, file_name)
+            #print("Ассиметрия в правую сторону: ", priznak[1], "Ассиметрия в левую сторону: ", priznak[2])
 
 
             count_ += 1
