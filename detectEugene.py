@@ -230,23 +230,36 @@ def ear_check(pose, image, scale):
 	ear = [0, 0, 0, 0]
 	ear[0], ear[1], ear[2], ear[3] = add_ear(pose, image, scale)
 
+	if max(ear[0].length, ear[2].length, ear[1].length, ear[3].length) == 0:
+		return "Неправильный ракурс", "Неправильный ракурс"
+
+	result = clamp((max(ear[0].length - ear[2].length, ear[1].length - ear[3].length) - 5) * 3.3, 0, 100)
+
+
+	return result, 100 - result
+
+
+
+def earlobe_size(pose, image, scale):
+	ear = [0, 0, 0, 0]
+	ear[0], ear[1], ear[2], ear[3] = add_ear(pose, image, scale)
+	
 	if (ear[0].x != pose.part(1).x) and (ear[0].x != 0):
-		x = (ear[0].x + pose.part(1).x) / 2
-		y = (ear[0].y + pose.part(1).y) / 2
+		x = (ear[0].x + pose.part(1).x + ear[2].x + pose.part(2).x) / 4
+		y = (ear[0].y + pose.part(1).y + ear[2].y + pose.part(2).y) / 4
 		
 		length1 = ear_height(pose, image, scale, x, y) 
 
 	if (ear[2].x != pose.part(15).x) and (ear[2].x != 0):
-		x = (ear[2].x + pose.part(15).x) / 2
-		y = (ear[2].y + pose.part(15).y) / 2
+		x = (ear[1].x + pose.part(15).x + ear[3].x + pose.part(14).x) / 4
+		y = (ear[1].y + pose.part(15).y + ear[3].y + pose.part(14).y) / 4
 		
 		length2 = ear_height(pose, image, scale, x, y) 
 
 	if max(ear[0].length, ear[2].length, ear[1].length, ear[3].length) == 0:
 		return "Неправильный ракурс", "Неправильный ракурс"
 
-	result = clamp((max(ear[0].length - ear[2].length, ear[1].length - ear[3].length) - 5) * 3.3, 0, 100)
-
+	result = clamp(max(length1, length2) * 4.8, 0, 100)
 
 	return result, 100 - result
 

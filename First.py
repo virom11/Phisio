@@ -20,7 +20,7 @@ ubuntu = False #Эта переменная используется для ра
 #Чтобы отключить подгон кода под особенности Ubuntu присвойте данной перменной значение False.
 
 priznak = []
-for i in range(0, 65):
+for i in range(0, 66):
     priznak.append(0)  # Массив значений признаков
 
 average1 = 0
@@ -32,15 +32,18 @@ max = 0
 min = 100
 
 if(ubuntu):
+
     print('Ubuntu is used now')
+
     predictor_model = "/home/vector/Documents/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
+    dir="/home/vector/Documents/Скулы на уровне глаз"
+
 else:
+
     predictor_model = "D:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
 
-if(ubuntu):
-    dir="/home/vector/Documents/Скулы на уровне глаз"
-else:
-    dir="D:/Dropbox/Студенты/Уши/Прижатые уши"
+    dir="D:/Dropbox/Студенты/Уши/Маленькая мочка уха"
+
 
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
     count=0 # Счетчик фоток в папке
@@ -195,12 +198,16 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             
             priznak[47], priznak[49] = detectEugene.ear_check(pose_landmarks, image1, prop)
             print("Прижатые уши: ", priznak[47], "Квадратная мочка уха: ", priznak[49])
-            '''
+            
             priznak[45], priznak[46], priznak[63] = detectEugene.cheekbones(pose_landmarks, image1, prop)
             print("Скулы выше уровня глаз: ", priznak[45], "Скулы на уровне глаз: ", priznak[46], "Скулы ниже уровня глаз: ", priznak[63])
 
-            #priznak[1], priznak[2] = detectVector.asymmetry(predictor_model, file_name)
-            #print("Ассиметрия в правую сторону: ", priznak[1], "Ассиметрия в левую сторону: ", priznak[2])
+            priznak[1], priznak[2] = detectVector.asymmetry(predictor_model, file_name)
+            print("Ассиметрия в правую сторону: ", priznak[1], "Ассиметрия в левую сторону: ", priznak[2])
+            '''
+
+            priznak[48], priznak[65] = detectEugene.earlobe_size(pose_landmarks, image1, prop)
+            print("Мочка уха большая: ", priznak[48], "Мочка уха маленькая: ", priznak[65])
 
             count_ += 1
             print(count_)
