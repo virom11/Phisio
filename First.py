@@ -1,15 +1,23 @@
+#! /usr/bin/env python 
+# -*- coding: utf-8 -*-
+#Строки для корректной работы с киррилицей в python. Работают даже в закоментированном состоянии
+
 import sys
 import dlib
 import detect
 import detectEugene
+import detectVector
 import os
-#import openface
+import openface
 import imageio
 from PIL import Image, ImageDraw
 from skimage import io
 from skimage.feature import hog
 import numpy as np
 import math
+
+ubuntu = False #Эта переменная используется для разработки на Ubuntu. 
+#Чтобы отключить подгон кода под особенности Ubuntu присвойте данной перменной значение False.
 
 priznak = []
 for i in range(0, 65):
@@ -22,14 +30,23 @@ count_ = 0
 
 max = 0
 min = 100
-predictor_model = "C:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
 
-dir="C:/Dropbox/Студенты/Скулы/Скулы на уровне глаз"
+if(ubuntu):
+    print('Ubuntu is used now')
+    predictor_model = "/home/vector/Documents/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
+else:
+    predictor_model = "D:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
+
+if(ubuntu):
+    dir="/home/vector/Documents/Скулы на уровне глаз"
+else:
+    dir="D:/Dropbox/Студенты/Уши/Прижатые уши"
+
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
     count=0 # Счетчик фоток в папке
     file_name=dir+"/"+filename
-    print(file_name)
-    if (file_name.endswith("_hog.jpg")==0) and (file_name.endswith("_detect.jpg")==0):  # Работаем только с оригиналом фото, не hog и не распознанное
+    if (file_name.endswith("_hog.jpg")==0) and (file_name.endswith("_detect.jpg")==0) and (file_name.endswith("_aligned.jpg")==0):  # Работаем только с оригиналом фото, не hog и не распознанное
+        print("File name is: " + file_name)
         count=count+1
         #file_name = 'E:/567.jpg'
         #file_name = 'D:/Dropbox/Студенты/Губы/Уголки губ вниз/331919_parni_iz_seriala_dnevniki_vampira.jpg';
@@ -39,6 +56,7 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
         image1 = Image.open(file_name) # Здесь откроет фото
         # Load the image into an array
         image = io.imread(file_name) # Здесь фото, как массив
+        #print(image)
         #win = dlib.image_window() # Если нужно выводить лицо на экран
         hog_list, hog_img = hog(image, orientations=8, pixels_per_cell=(16, 16), cells_per_block=(1, 1), block_norm='L1',
                                 visualize=True, feature_vector=True) # Генерируем hog изображение
@@ -179,17 +197,13 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             print("Прижатые уши: ", priznak[47], "Квадратная мочка уха: ", priznak[49])
             '''
             priznak[45], priznak[46], priznak[63] = detectEugene.cheekbones(pose_landmarks, image1, prop)
-            print("Скулы выше уровня глаз: ", priznak[45], "Скулы ниже уровня глаз: ", priznak[46])
+            print("Скулы выше уровня глаз: ", priznak[45], "Скулы на уровне глаз: ", priznak[46], "Скулы ниже уровня глаз: ", priznak[63])
 
-            #average1 += priznak[57]
-            #average2 += priznak[58]
-            #average3 += priznak[59]
+            #priznak[1], priznak[2] = detectVector.asymmetry(predictor_model, file_name)
+            #print("Ассиметрия в правую сторону: ", priznak[1], "Ассиметрия в левую сторону: ", priznak[2])
+
             count_ += 1
             print(count_)
-
-            if count_ == 25:
-                average1, average2, average3 = average1 / count_, average2 / count_, average3 / count_
-                print(average1, average2, average3)
 
 
 print("Максимум: ", max)
