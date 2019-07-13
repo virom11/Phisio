@@ -258,4 +258,8 @@ def cheekbones(pose, image, scale):
 
 	result = lined(eye_x, eye_y, pose.part(0).x, pose.part(0).y, pose.part(16).x, pose.part(16).y)
 
-	return result, 1, 1
+	result1 = clamp((result + 25) * 2, 0, 100)
+	result3 = clamp(100 - abs(result) * 9, 0, 100)
+	result2 = 100 - result1 
+
+	return result1, result2, result3
