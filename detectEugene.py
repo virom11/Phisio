@@ -226,7 +226,7 @@ def ear_size(pose, image, scale):
 
 
 
-def ear_script(pose, image, scale):
+def ear_check(pose, image, scale):
 	ear = [0, 0, 0, 0]
 	ear[0], ear[1], ear[2], ear[3] = add_ear(pose, image, scale)
 
@@ -242,4 +242,20 @@ def ear_script(pose, image, scale):
 		
 		length2 = ear_height(pose, image, scale, x, y) 
 
-	return max(length1, length2), max(ear[0].length - ear[2].length, ear[1].length - ear[3].length)
+	if max(ear[0].length, ear[2].length, ear[1].length, ear[3].length) == 0:
+		return "Неправильный ракурс", "Неправильный ракурс"
+
+	result = clamp((max(ear[0].length - ear[2].length, ear[1].length - ear[3].length) - 5) * 3.3, 0, 100)
+
+
+	return result, 100 - result
+
+
+
+def cheekbones(pose, image, scale):
+	eye_x = (pose.part(36).x + pose.part(45).x) / 2
+	eye_y = (pose.part(36).y + pose.part(45).y) / 2
+
+	result = lined(eye_x, eye_y, pose.part(0).x, pose.part(0).y, pose.part(16).x, pose.part(16).y)
+
+	return result, 1, 1

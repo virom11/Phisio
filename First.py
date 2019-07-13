@@ -15,13 +15,16 @@ priznak = []
 for i in range(0, 65):
     priznak.append(0)  # Массив значений признаков
 
+average1 = 0
+average2 = 0
+average3 = 0
 count_ = 0
 
 max = 0
 min = 100
-predictor_model = "D:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
+predictor_model = "C:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
 
-dir="D:/Dropbox/Студенты/Уши/Прижатые уши"
+dir="C:/Dropbox/Студенты/Скулы/Скулы на уровне глаз"
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
     count=0 # Счетчик фоток в папке
     file_name=dir+"/"+filename
@@ -168,12 +171,25 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             
             priznak[57], priznak[58], priznak[59] = detectEugene.worlds(pose_landmarks, image1, prop)
             print("Духовный : ", priznak[57]," Материальный: ", priznak[58]," Семейный: ", priznak[59])
-            '''
+            
             priznak[50], priznak[64] = detectEugene.ear_size(pose_landmarks, image1, prop)
             print("Лопоухий: ", priznak[50], "Прижатые уши: ", priznak[64])
+            
+            priznak[47], priznak[49] = detectEugene.ear_check(pose_landmarks, image1, prop)
+            print("Прижатые уши: ", priznak[47], "Квадратная мочка уха: ", priznak[49])
+            '''
+            priznak[45], priznak[46], priznak[63] = detectEugene.cheekbones(pose_landmarks, image1, prop)
+            print("Скулы выше уровня глаз: ", priznak[45], "Скулы ниже уровня глаз: ", priznak[46])
 
+            #average1 += priznak[57]
+            #average2 += priznak[58]
+            #average3 += priznak[59]
             count_ += 1
             print(count_)
+
+            if count_ == 25:
+                average1, average2, average3 = average1 / count_, average2 / count_, average3 / count_
+                print(average1, average2, average3)
 
 
 print("Максимум: ", max)
