@@ -45,10 +45,12 @@ def nose(predictor_model,file_name,pose_landmarks):
     y2=pose_landmarks.part(33).y
     y=round(pose_landmarks.part(27).y)
     first_color=pix[round(((y-y1)*(x2-x1)+x1*(y2-y1))/(y2-y1)),y]
-    #print(first_color)
+    
     average_f=(first_color[0]+first_color[1]+first_color[2])/3
-    #print('average_f: '+str(average_f))
+    
     """
+    print(first_color)
+    print('average_f: '+str(average_f))
     print('Image Size: '+str(im.size))  # Get the width and hight of the image for iterating over
     print('limit_y1: '+str(limit_y1))
     print('limit_y2: '+str(limit_y2))
@@ -59,9 +61,10 @@ def nose(predictor_model,file_name,pose_landmarks):
     """
     while((y>limit_y2) or (y<0)):
         pix_x=round(((y-y1)*(x2-x1)+x1*(y2-y1))/(y2-y1))
-        #print('pix_x: '+str(pix_x))
+        
         second_color=pix[pix_x,y]
         average_s=(second_color[0]+second_color[1]+second_color[2])/3
+        #print('pix_x: '+str(pix_x))
         #print(second_color)
         #print('average_s: '+str(average_s))
         # Get the RGBA Value of the a pixel of an image
