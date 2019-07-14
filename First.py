@@ -16,7 +16,7 @@ from skimage.feature import hog
 import numpy as np
 import math
 
-ubuntu = False #Эта переменная используется для разработки на Ubuntu. 
+ubuntu = True #Эта переменная используется для разработки на Ubuntu. 
 #Чтобы отключить подгон кода под особенности Ubuntu присвойте данной перменной значение False.
 
 priznak = []
@@ -36,12 +36,11 @@ if(ubuntu):
     print('Ubuntu is used now')
 
     predictor_model = "/home/vector/Documents/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
-    dir="/home/vector/Documents/Скулы на уровне глаз"
+    dir="/home/vector/Documents/Нос/Прямой нос"
 
 else:
 
     predictor_model = "D:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
-
     dir="D:/Dropbox/Студенты/Уши/Маленькая мочка уха"
 
 
@@ -206,8 +205,11 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             print("Ассиметрия в правую сторону: ", priznak[1], "Ассиметрия в левую сторону: ", priznak[2])
             '''
 
-            priznak[48], priznak[65] = detectEugene.earlobe_size(pose_landmarks, image1, prop)
-            print("Мочка уха большая: ", priznak[48], "Мочка уха маленькая: ", priznak[65])
+            #priznak[48], priznak[65] = detectEugene.earlobe_size(pose_landmarks, image1, prop)
+            #print("Мочка уха большая: ", priznak[48], "Мочка уха маленькая: ", priznak[65])
+
+            priznak[62], priznak[39] = detectVector.nose(predictor_model, file_name,pose_landmarks)
+            print("Прямой нос: ", priznak[62], "Нос с горбинкой: ", priznak[39])
 
             count_ += 1
             print(count_)

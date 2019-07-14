@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 #Строки для корректной работы с киррилицей в python. Работают даже в закоментированном состоянии
 
+
 from skimage.future import graph
 from skimage import data, segmentation, color, filters, io
 from matplotlib import pyplot as plt
@@ -22,7 +23,7 @@ lc = graph.show_rag(labels, g, edges_rgb, img_cmap=None, edge_cmap='viridis',
 plt.colorbar(lc, fraction=0.1)
 io.show()
 
-"""
+'''
 
 from skimage import data, segmentation, color
 from skimage.future import graph
