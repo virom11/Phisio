@@ -16,7 +16,7 @@ from skimage.feature import hog
 import numpy as np
 import math
 
-ubuntu = True #Эта переменная используется для разработки на Ubuntu. 
+ubuntu = False #Эта переменная используется для разработки на Ubuntu. 
 #Чтобы отключить подгон кода под особенности Ubuntu присвойте данной перменной значение False.
 
 priznak = []

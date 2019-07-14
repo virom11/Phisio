@@ -65,7 +65,7 @@ def nose(predictor_model,file_name,pose_landmarks):
         #print(second_color)
         #print('average_s: '+str(average_s))
         # Get the RGBA Value of the a pixel of an image
-        pix[pix_x,y] = (255,255,255)  # Set the RGBA Value of the image (tuple)
+        #pix[pix_x,y] = (255,255,255)  # Set the RGBA Value of the image (tuple)
         y-=1
         if(average_s<(average_f/2)):
             straight=0
@@ -74,7 +74,7 @@ def nose(predictor_model,file_name,pose_landmarks):
         else:
             straight=(1/200)*average_f*(average_f-average_s)
             unstraight=100-straight
-    im.save(file_name)
+    #im.save(file_name)
     if((straight<0)or(unstraight<0)):
         straight=100
         unstraight=0
