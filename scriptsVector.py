@@ -30,6 +30,23 @@ def face_aligner_func(predictor_path,face_file_path):
 
     return pose_landmarks
 
+def distance(x1,y1,x2,y2):
+    dist=math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1))
+
+    return dist
+
+def range(val1,val2):
+
+    if(val1>100):
+        val1=100
+        val2=0
+    elif(val1<0):
+        val1=0
+        val2=100
+
+    return val1,val2
+
+
 """
 
 import math

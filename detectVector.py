@@ -36,11 +36,8 @@ def nose(predictor_model,file_name,pose_landmarks):
     im = Image.open(file_name) # Can be many different formats.
     pix = im.load()
     #print('Image Size: '+str(im.size))  # Get the width and hight of the image for iterating over
-    #pose_landmarks=scriptsVector.face_aligner_func(predictor_model,file_name)
     limit_y1=round(pose_landmarks.part(27).y)
-    #print('limit_y1: '+str(limit_y1))
     limit_y2=round(2*pose_landmarks.part(27).y-pose_landmarks.part(28).y)
-    #print('limit_y2: '+str(limit_y2))
     x1=pose_landmarks.part(27).x
     x2=pose_landmarks.part(33).x
     y1=pose_landmarks.part(27).y
@@ -50,10 +47,7 @@ def nose(predictor_model,file_name,pose_landmarks):
     print('first_color: '+str(first_color))
     average_f=(first_color[0]+first_color[1]+first_color[2])/3
     print('average_f: '+str(average_f))
-    #print('x1: '+str(x1))
-    #print('x2: '+str(x2))
-    #print('y1: '+str(y1))
-    #print('y2: '+str(y2))
+
     counter=0
     sum_avs=0
     while((y>limit_y2) and (y>0)):
@@ -62,9 +56,6 @@ def nose(predictor_model,file_name,pose_landmarks):
         second_color=pix[pix_x,y]
         average_s=(second_color[0]+second_color[1]+second_color[2])/3
         sum_avs+=average_s
-        #print('pix_x: '+str(pix_x))
-        #print('second_color: '+str(second_color))
-        #print(str(y)+" "+str(average_s))
         # Get the RGBA Value of the a pixel of an image
         #pix[pix_x,y] = (255,255,255)  # Set the RGBA Value of the image (tuple)
         y-=1
@@ -81,3 +72,26 @@ def nose(predictor_model,file_name,pose_landmarks):
 
     unstraight=100-straight
     return straight,unstraight
+
+def nose_size(predictor_model,file_name,pose_landmarks):
+    big = 0
+    small = 0
+    dist=scriptsVector.distance(pose_landmarks.part(29).x,pose_landmarks.part(29).y,pose_landmarks.part(30).x,pose_landmarks.part(30).y)
+    dist_control=scriptsVector.distance(pose_landmarks.part(30).x,pose_landmarks.part(30).y,pose_landmarks.part(33).x,pose_landmarks.part(33).y)
+    print('Distance: '+ str(dist))
+    print('Control distance: '+ str(dist_control))
+
+    if(dist_control==dist):
+        big=50
+        small=50
+    elif(dist_control<dist):
+        big=50+(dist-dist_control)/0.2
+        small=100-big
+    elif(dist_control>dist):
+        small=50+(dist_control-dist)/0.2
+        big=100-small
+    print('big: '+ str(big))
+    print('small: '+ str(small))
+    big,small=scriptsVector.range(big,small)
+    
+    return big,small
