@@ -35,50 +35,49 @@ def asymmetry(predictor_model,file_name):
 def nose(predictor_model,file_name,pose_landmarks):
     im = Image.open(file_name) # Can be many different formats.
     pix = im.load()
-    
+    #print('Image Size: '+str(im.size))  # Get the width and hight of the image for iterating over
     #pose_landmarks=scriptsVector.face_aligner_func(predictor_model,file_name)
     limit_y1=round(pose_landmarks.part(27).y)
+    #print('limit_y1: '+str(limit_y1))
     limit_y2=round(2*pose_landmarks.part(27).y-pose_landmarks.part(28).y)
+    #print('limit_y2: '+str(limit_y2))
     x1=pose_landmarks.part(27).x
     x2=pose_landmarks.part(33).x
     y1=pose_landmarks.part(27).y
     y2=pose_landmarks.part(33).y
     y=round(pose_landmarks.part(27).y)
     first_color=pix[round(((y-y1)*(x2-x1)+x1*(y2-y1))/(y2-y1)),y]
-    
+    print('first_color: '+str(first_color))
     average_f=(first_color[0]+first_color[1]+first_color[2])/3
-    
-    """
-    print(first_color)
     print('average_f: '+str(average_f))
-    print('Image Size: '+str(im.size))  # Get the width and hight of the image for iterating over
-    print('limit_y1: '+str(limit_y1))
-    print('limit_y2: '+str(limit_y2))
-    print('x1: '+str(x1))
-    print('x2: '+str(x2))
-    print('y1: '+str(y1))
-    print('y2: '+str(y2))
-    """
-    while((y>limit_y2) or (y<0)):
+    #print('x1: '+str(x1))
+    #print('x2: '+str(x2))
+    #print('y1: '+str(y1))
+    #print('y2: '+str(y2))
+    counter=0
+    sum_avs=0
+    while((y>limit_y2) and (y>0)):
+        counter+=1
         pix_x=round(((y-y1)*(x2-x1)+x1*(y2-y1))/(y2-y1))
-        
         second_color=pix[pix_x,y]
         average_s=(second_color[0]+second_color[1]+second_color[2])/3
+        sum_avs+=average_s
         #print('pix_x: '+str(pix_x))
-        #print(second_color)
-        #print('average_s: '+str(average_s))
+        #print('second_color: '+str(second_color))
+        #print(str(y)+" "+str(average_s))
         # Get the RGBA Value of the a pixel of an image
         #pix[pix_x,y] = (255,255,255)  # Set the RGBA Value of the image (tuple)
         y-=1
-        if(average_s<(average_f/2)):
-            straight=0
-            unstraight=100
-            break
-        else:
-            straight=(1/200)*average_f*(average_f-average_s)
-            unstraight=100-straight
     #im.save(file_name)
-    if((straight<0)or(unstraight<0)):
+    sum_avs=sum_avs/counter
+    print('sum_avs: '+str(sum_avs))
+    
+    if(sum_avs>(average_f-10)):
         straight=100
-        unstraight=0
+    elif(sum_avs<(average_f-16)):
+        straight=0
+    else:
+        straight=(average_f-sum_avs-10)/0.06
+
+    unstraight=100-straight
     return straight,unstraight
