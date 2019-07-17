@@ -16,7 +16,7 @@ from skimage.feature import hog
 import numpy as np
 import math
 
-ubuntu = True #Эта переменная используется для разработки на Ubuntu. 
+ubuntu = False #Эта переменная используется для разработки на Ubuntu. 
 #Чтобы отключить подгон кода под особенности Ubuntu присвойте данной перменной значение False.
 
 priznak = []
@@ -36,7 +36,7 @@ if(ubuntu):
     print('Ubuntu is used now')
 
     predictor_model = "/home/vector/Documents/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
-    dir="/home/vector/Documents/Нос/Нос картошкой"
+    dir="/home/vector/Documents/Нос/Нос с горбинкой"
     #dir="/home/vector/Documents/Нос/Курносый нос"
 
 else:
@@ -212,8 +212,14 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             #priznak[62], priznak[39] = detectVector.nose(predictor_model, file_name,pose_landmarks)
             #print("Прямой нос: ", priznak[62], "Переносица с впадиной: ", priznak[39])
 
-            priznak[36], priznak[37] = detectVector.nose_size(predictor_model, file_name,pose_landmarks)
-            print("Нос картошкой: ", priznak[36], "Курносый нос: ", priznak[37])
+            #priznak[36], priznak[37],priznak[60] = detectVector.nose_size(predictor_model, file_name,pose_landmarks)
+            #print("Нос картошкой: ", priznak[36], "Курносый нос: ", priznak[37], "Кончик носа вниз: ", priznak[60])
+
+            #priznak[61] = detectVector.nose_wings(predictor_model, file_name,pose_landmarks)
+            #print("Крылья носа очерчены: ", priznak[61])
+
+            #priznak[39] = detectVector.hump_nose(predictor_model, file_name,pose_landmarks)
+            #print("Горбинка на носу: ", priznak[39])
 
             count_ += 1
             print(count_)

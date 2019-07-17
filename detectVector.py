@@ -76,6 +76,7 @@ def nose(predictor_model,file_name,pose_landmarks):
 def nose_size(predictor_model,file_name,pose_landmarks):
     big = 0
     small = 0
+    tip=0
     dist=scriptsVector.distance(pose_landmarks.part(29).x,pose_landmarks.part(29).y,pose_landmarks.part(30).x,pose_landmarks.part(30).y)
     dist_control=scriptsVector.distance(pose_landmarks.part(30).x,pose_landmarks.part(30).y,pose_landmarks.part(33).x,pose_landmarks.part(33).y)
     print('Distance: '+ str(dist))
@@ -93,5 +94,112 @@ def nose_size(predictor_model,file_name,pose_landmarks):
     print('big: '+ str(big))
     print('small: '+ str(small))
     big,small=scriptsVector.range(big,small)
+
+    if(big==100):
+        tip=100
     
-    return big,small
+    return big,small,tip
+
+def nose_wings(predictor_model,file_name,pose_landmarks):
+    nose_wings=0
+    im = Image.open(file_name) # Can be many different formats.
+    pix = im.load()
+    a=27
+    b=30
+    distance_1=scriptsVector.distance(pose_landmarks.part(27).x,pose_landmarks.part(27).y,pose_landmarks.part(0).x,pose_landmarks.part(0).y)
+    distance_2=scriptsVector.distance(pose_landmarks.part(27).x,pose_landmarks.part(27).y,pose_landmarks.part(16).x,pose_landmarks.part(16).y)
+    if(distance_1>distance_2):
+        a=31
+        b=39
+    else:
+        a=35
+        b=42
+
+    #print('Image Size: '+str(im.size))  # Get the width and hight of the image for iterating over
+    limit_y1=round(pose_landmarks.part(30).y+((pose_landmarks.part(29).y-pose_landmarks.part(30).y)*0.35))
+    limit_y2=round(pose_landmarks.part(28).y+((pose_landmarks.part(28).y-pose_landmarks.part(29).y)*0.25))
+    x1=pose_landmarks.part(a).x
+    x2=pose_landmarks.part(b).x
+    y1=pose_landmarks.part(a).y
+    y2=pose_landmarks.part(b).y
+    y=limit_y1
+    first_color=pix[round(((y-y1)*(x2-x1)+x1*(y2-y1))/(y2-y1)),y]
+    print('first_color: '+str(first_color))
+    average_f=(first_color[0]+first_color[1]+first_color[2])/3
+    print('average_f: '+str(average_f))
+    flag=0
+    minimal=average_f
+    maximum=0
+    while((y>limit_y2) and (y>0)):
+        pix_x=round(((y-y1)*(x2-x1)+x1*(y2-y1))/(y2-y1))
+        second_color=pix[pix_x,y]
+        average_s=(second_color[0]+second_color[1]+second_color[2])/3
+        print(str(average_s))
+        if(average_s<minimal):
+            minimal=average_s
+            flag=y
+            maximum=average_s
+        if(average_s>maximum):
+            maximum=average_s
+
+        # Get the RGBA Value of the a pixel of an image
+        pix[pix_x,y] = (255,255,255)  # Set the RGBA Value of the image (tuple)
+        y-=1
+    print('minimal: '+str(minimal))
+    print('maximum: '+str(maximum))
+    if(minimal<(maximum-40)):
+        nose_wings=100
+    else:
+        nose_wings=(maximum-minimal)/0.4
+    im.save(file_name)
+
+    return nose_wings
+
+def hump_nose(predictor_model,file_name,pose_landmarks):
+
+    hump_nose = 0
+    im = Image.open(file_name) # Can be many different formats.
+    pix = im.load()
+    #print('Image Size: '+str(im.size))  # Get the width and hight of the image for iterating over
+
+    distance_1=scriptsVector.distance(pose_landmarks.part(27).x,pose_landmarks.part(27).y,pose_landmarks.part(0).x,pose_landmarks.part(0).y)
+    distance_2=scriptsVector.distance(pose_landmarks.part(27).x,pose_landmarks.part(27).y,pose_landmarks.part(16).x,pose_landmarks.part(16).y)
+    print('distance_1: '+str(distance_1))
+    print('distance_2: '+str(distance_2))
+    if(distance_1<distance_2):
+        a=39
+        sign=-1
+    else:
+        a=42
+        sign=1
+    b=28
+    print('a: '+str(a))
+    
+    while(b<30):
+        print('b: '+str(b))
+        limit_x1=round(pose_landmarks.part(b).x)
+        limit_x2=round(pose_landmarks.part(a).x)
+        x=limit_x1
+        y=round(pose_landmarks.part(b).y)
+        first_color=pix[x,y]
+        print('first_color: '+str(first_color))
+        average_f=(first_color[0]+first_color[1]+first_color[2])/3
+        print('average_f: '+str(average_f))
+        minimal=average_f
+        flag=x
+        while((x!=limit_x2) and (x>0)):
+            second_color=pix[x,y]
+            average_s=(second_color[0]+second_color[1]+second_color[2])/3
+            if(average_s<minimal):
+                minimal=average_s
+                flag=x
+            # Get the RGBA Value of the a pixel of an image
+            pix[x,y] = (255,255,255)  # Set the RGBA Value of the image (tuple)
+            x=x+1*sign
+        flag=abs(limit_x1-flag)
+        print('flag: '+str(flag))
+        b+=1
+    im.save(file_name)
+
+
+    return hump_nose
