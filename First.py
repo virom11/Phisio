@@ -36,8 +36,8 @@ if(ubuntu):
     print('Ubuntu is used now')
 
     predictor_model = "/home/vector/Documents/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
-    dir="/home/vector/Documents/Нос/Нос с горбинкой"
-    #dir="/home/vector/Documents/Нос/Курносый нос"
+    #dir="/home/vector/Documents/Лоб/Прямой лоб"
+    dir="/home/vector/Documents/Лоб/Выпуклый лоб"
 
 else:
 
@@ -220,6 +220,13 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
 
             #priznak[39] = detectVector.hump_nose(predictor_model, file_name,pose_landmarks)
             #print("Горбинка на носу: ", priznak[39])
+
+            #priznak[33],priznak[31] = detectVector.forehead(predictor_model, file_name,pose_landmarks)
+            #print("Прямой лоб : ", priznak[33],"Выпуклый лоб : ", priznak[31])
+
+            #priznak[15],priznak[13], priznak[14] = detectVector.eyelids(predictor_model, file_name,pose_landmarks)
+            #print("Веки, закрытые внутри : ", priznak[15],"Веки, закрытые посередине  : ", priznak[13],"Веки, закрытые снаружи  : ", priznak[14])
+            #ВЕКАМ ТРЕБУЮТСЯ ФИКСЫ
 
             count_ += 1
             print(count_)

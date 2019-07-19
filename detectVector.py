@@ -145,8 +145,8 @@ def nose_wings(predictor_model,file_name,pose_landmarks):
         # Get the RGBA Value of the a pixel of an image
         pix[pix_x,y] = (255,255,255)  # Set the RGBA Value of the image (tuple)
         y-=1
-    print('minimal: '+str(minimal))
-    print('maximum: '+str(maximum))
+    #print('minimal: '+str(minimal))
+    #print('maximum: '+str(maximum))
     if(minimal<(maximum-40)):
         nose_wings=100
     else:
@@ -164,42 +164,102 @@ def hump_nose(predictor_model,file_name,pose_landmarks):
 
     distance_1=scriptsVector.distance(pose_landmarks.part(27).x,pose_landmarks.part(27).y,pose_landmarks.part(0).x,pose_landmarks.part(0).y)
     distance_2=scriptsVector.distance(pose_landmarks.part(27).x,pose_landmarks.part(27).y,pose_landmarks.part(16).x,pose_landmarks.part(16).y)
-    print('distance_1: '+str(distance_1))
-    print('distance_2: '+str(distance_2))
-    if(distance_1<distance_2):
-        a=39
-        sign=-1
-    else:
+    #print('distance_1: '+str(distance_1))
+    #print('distance_2: '+str(distance_2))
+    
+    #round(((y-y1)*(x2-x1)+x1*(y2-y1))/(y2-y1))
+    if(distance_1>distance_2):
         a=42
         sign=1
+    else:
+        a=39
+        sign=-1
     b=28
-    print('a: '+str(a))
-    
+    s=[]
+    #print('a: '+str(a))
     while(b<30):
-        print('b: '+str(b))
-        limit_x1=round(pose_landmarks.part(b).x)
-        limit_x2=round(pose_landmarks.part(a).x)
-        x=limit_x1
+        #print('b: '+str(b))
+        x1=pose_landmarks.part(27).x
+        x2=pose_landmarks.part(30).x
+        y1=pose_landmarks.part(27).y
+        y2=pose_landmarks.part(30).y
         y=round(pose_landmarks.part(b).y)
+        limit_x1=round(pose_landmarks.part(b).x)
+        limit_x2=round(((y-y1)*(x2-x1)+pose_landmarks.part(a).x*(y2-y1))/(y2-y1))
+        x=limit_x1
         first_color=pix[x,y]
-        print('first_color: '+str(first_color))
+        #print('first_color: '+str(first_color))
         average_f=(first_color[0]+first_color[1]+first_color[2])/3
-        print('average_f: '+str(average_f))
-        minimal=average_f
-        flag=x
+        #print('average_f: '+str(average_f))
+        average_s=0
+        counter=0
         while((x!=limit_x2) and (x>0)):
+            
             second_color=pix[x,y]
-            average_s=(second_color[0]+second_color[1]+second_color[2])/3
-            if(average_s<minimal):
-                minimal=average_s
-                flag=x
+            average_s+=(second_color[0]+second_color[1]+second_color[2])/3
+            counter+=1
             # Get the RGBA Value of the a pixel of an image
-            pix[x,y] = (255,255,255)  # Set the RGBA Value of the image (tuple)
+            #pix[x,y] = (255,255,255)  # Set the RGBA Value of the image (tuple)
             x=x+1*sign
-        flag=abs(limit_x1-flag)
-        print('flag: '+str(flag))
+        average_s=average_s/counter
+        s.append(average_s)
+        #print('average_s: '+str(average_s))
+        #flag=abs(limit_x1-flag)
+        #print('flag: '+str(flag))
+        
         b+=1
-    im.save(file_name)
+    #print(abs(s[0]-s[1]))
+    if(abs(s[0]-s[1])>10):
+        hump_nose=100
+    else:
+        hump_nose=(abs(s[0]-s[1]))/0.1
+    #im.save(file_name)
 
 
     return hump_nose
+
+def forehead(predictor_model,file_name,pose_landmarks):
+    smooth=0
+    convex=0
+    im = Image.open(file_name) # Can be many different formats.
+    pix = im.load()
+    #print('Image Size: '+str(im.size))  # Get the width and hight of the image for iterating over
+    x1=pose_landmarks.part(18).x
+    x2=pose_landmarks.part(25).x
+    y1=pose_landmarks.part(18).y
+    y2=pose_landmarks.part(25).y
+    x=round(x1)
+    yn=(2*pose_landmarks.part(18).y-pose_landmarks.part(37).y)
+    y=round((((y2-y1)*(x-x1))+yn*(x2-x1))/(x2-x1))
+    #first_color=pix[x,y]
+    #print('first_color: '+str(first_color))
+    #average_f=(first_color[0]+first_color[1]+first_color[2])/3
+    #print('average_f: '+str(average_f))
+
+    max=0
+    min=255
+    
+    while((x<x2) and (x>0)):
+        y=round((((y2-y1)*(x-x1))+yn*(x2-x1))/(x2-x1))
+        second_color=pix[x,y]
+        average_s=(second_color[0]+second_color[1]+second_color[2])/3
+        if(average_s<min):
+            min=average_s
+        if(average_s>max):
+            max=average_s
+        #pix[x,y] = (255,255,255)
+        x+=1
+    if((max-min)>60):
+        smooth=0
+    else:
+        smooth=100
+    convex=100-0
+        
+    #im.save(file_name)
+    return smooth,convex
+
+def eyelids(predictor_model,file_name,pose_landmarks):
+    im = Image.open(file_name) # Can be many different formats.
+    pix = im.load()
+
+    return inside, center, outside
