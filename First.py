@@ -16,7 +16,7 @@ from skimage.feature import hog
 import numpy as np
 import math
 
-ubuntu = False #Эта переменная используется для разработки на Ubuntu. 
+ubuntu = True #Эта переменная используется для разработки на Ubuntu. 
 #Чтобы отключить подгон кода под особенности Ubuntu присвойте данной перменной значение False.
 
 priznak = []
@@ -37,7 +37,7 @@ if(ubuntu):
 
     predictor_model = "/home/vector/Documents/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
     #dir="/home/vector/Documents/Лоб/Прямой лоб"
-    dir="/home/vector/Documents/Лоб/Выпуклый лоб"
+    dir="/home/vector/Documents/Веки/Закрытые посередине"
 
 else:
 
@@ -224,8 +224,8 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             #priznak[33],priznak[31] = detectVector.forehead(predictor_model, file_name,pose_landmarks)
             #print("Прямой лоб : ", priznak[33],"Выпуклый лоб : ", priznak[31])
 
-            #priznak[15],priznak[13], priznak[14] = detectVector.eyelids(predictor_model, file_name,pose_landmarks)
-            #print("Веки, закрытые внутри : ", priznak[15],"Веки, закрытые посередине  : ", priznak[13],"Веки, закрытые снаружи  : ", priznak[14])
+            priznak[15],priznak[13], priznak[14] = detectVector.eyelids(predictor_model, file_name,pose_landmarks)
+            print("Веки, закрытые внутри : ", priznak[15],"Веки, закрытые посередине  : ", priznak[13],"Веки, закрытые снаружи  : ", priznak[14])
             #ВЕКАМ ТРЕБУЮТСЯ ФИКСЫ
 
             count_ += 1

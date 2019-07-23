@@ -11,7 +11,8 @@ from PIL import Image, ImageDraw
 import dlib
 import cv2
 import openface
-
+import matplotlib.pyplot as plt
+import matplotlib.transforms as mtransforms
 import scriptsVector
 
 def asymmetry(predictor_model,file_name):
@@ -259,7 +260,72 @@ def forehead(predictor_model,file_name,pose_landmarks):
     return smooth,convex
 
 def eyelids(predictor_model,file_name,pose_landmarks):
+    inside=0
+    center=0
+    outside=0
     im = Image.open(file_name) # Can be many different formats.
     pix = im.load()
+    distance_1=scriptsVector.distance(pose_landmarks.part(27).x,pose_landmarks.part(27).y,pose_landmarks.part(0).x,pose_landmarks.part(0).y)
+    distance_2=scriptsVector.distance(pose_landmarks.part(27).x,pose_landmarks.part(27).y,pose_landmarks.part(16).x,pose_landmarks.part(16).y)
+    #print('distance_1: '+str(distance_1))
+    #print('distance_2: '+str(distance_2))
+    
+    #round(((y-y1)*(x2-x1)+x1*(y2-y1))/(y2-y1))
+    if(distance_1>distance_2):
+        a=36
+        b=37
+    else:
+        a=42
+        b=44
+    print('a: '+str(a))
+    counter=0
+
+
+    while(counter<4):
+        limit_y1=round(pose_landmarks.part(a+counter).y)
+        limit_y2=round((pose_landmarks.part(18).y-pose_landmarks.part(37).y)/2+pose_landmarks.part(37).y)
+        x1=pose_landmarks.part(27).x
+        x2=pose_landmarks.part(33).x
+        y1=pose_landmarks.part(27).y
+        y2=pose_landmarks.part(33).y
+        y=limit_y1
+        y_data=[]
+        average_s_data=[]
+        while(y>limit_y2):
+            color=pix[round(((y-y1)*(x2-x1)+pose_landmarks.part(a+counter).x*(y2-y1))/(y2-y1)),y]
+            average_s=(color[0]+color[1]+color[2])/3
+            y_data.append(y)
+            average_s_data.append(average_s)
+            #print(str(average_f))
+            #pix[pose_landmarks.part(a+counter).x,y] = (255,255,255)
+            y-=1
+        # Creates just a figure and only one subplot
+        fig, ax = plt.subplots()
+        ax.plot(y_data, average_s_data)
+        ax.set_title('Plot of point: ' + str(a+counter))
+        fig.savefig(file_name.replace(".jpg",str(a+counter)+"_.jpg"))
+        counter+=3
+    #im.save(file_name)
+    
+    plt.show()
+
+
+    """
+fig, ax = plt.subplots()
+
+line1, = ax.plot(x,y, label="Line 1", linewidth=2)
+line2, = ax.plot([3, 2, 1], label="Line 2", linewidth=1)
+
+# Create a legend for the first line.
+first_legend = ax.legend(handles=[line1], loc='upper right')
+
+# Add the legend manually to the current Axes.
+ax.add_artist(first_legend)
+
+# Create another legend for the second line.
+ax.legend(handles=[line2], loc='lower right')
+
+plt.show()
+    """
 
     return inside, center, outside
