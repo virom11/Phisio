@@ -33,7 +33,7 @@ min = 100
 
 if(ubuntu):
 
-    print('Ubuntu is used now')
+    print('Ubuntu is used now.')
 
     predictor_model = "/home/vector/Documents/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
     #dir="/home/vector/Documents/Лоб/Прямой лоб"

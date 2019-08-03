@@ -45,9 +45,9 @@ def nose(predictor_model,file_name,pose_landmarks):
     y2=pose_landmarks.part(33).y
     y=round(pose_landmarks.part(27).y)
     first_color=pix[round(((y-y1)*(x2-x1)+x1*(y2-y1))/(y2-y1)),y]
-    print('first_color: '+str(first_color))
+    #print('first_color: '+str(first_color))
     average_f=(first_color[0]+first_color[1]+first_color[2])/3
-    print('average_f: '+str(average_f))
+    #print('average_f: '+str(average_f)) 
 
     counter=0
     sum_avs=0
@@ -62,7 +62,7 @@ def nose(predictor_model,file_name,pose_landmarks):
         y-=1
     #im.save(file_name)
     sum_avs=sum_avs/counter
-    print('sum_avs: '+str(sum_avs))
+    #print('sum_avs: '+str(sum_avs))
     
     if(sum_avs>(average_f-10)):
         straight=100
@@ -125,9 +125,9 @@ def nose_wings(predictor_model,file_name,pose_landmarks):
     y2=pose_landmarks.part(b).y
     y=limit_y1
     first_color=pix[round(((y-y1)*(x2-x1)+x1*(y2-y1))/(y2-y1)),y]
-    print('first_color: '+str(first_color))
+    #print('first_color: '+str(first_color))
     average_f=(first_color[0]+first_color[1]+first_color[2])/3
-    print('average_f: '+str(average_f))
+    #print('average_f: '+str(average_f))
     flag=0
     minimal=average_f
     maximum=0
@@ -135,7 +135,7 @@ def nose_wings(predictor_model,file_name,pose_landmarks):
         pix_x=round(((y-y1)*(x2-x1)+x1*(y2-y1))/(y2-y1))
         second_color=pix[pix_x,y]
         average_s=(second_color[0]+second_color[1]+second_color[2])/3
-        print(str(average_s))
+        #print(str(average_s))
         if(average_s<minimal):
             minimal=average_s
             flag=y
