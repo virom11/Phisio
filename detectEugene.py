@@ -13,34 +13,32 @@ from scriptsEugene import *
 
 # Домиком, Кругом, Линией
 def eyebrows(pose, scale):
-    scale = 100 / scale
+	scale = 100 / scale
 
-    dir1 = dir_between(pose.part(17).x, pose.part(17).y, pose.part(18).x, pose.part(18).y,
-                       pose.part(21).x, pose.part(21).y, pose.part(19).x, pose.part(19).y)
+	dir1 = dir_between(pose.part(17).x, pose.part(17).y, pose.part(18).x, pose.part(18).y,
+											pose.part(21).x, pose.part(21).y, pose.part(19).x, pose.part(19).y)
 
-    dir2 = dir_between(pose.part(25).x, pose.part(25).y, pose.part(26).x, pose.part(26).y,
-                       pose.part(22).x, pose.part(22).y, pose.part(24).x, pose.part(24).y)
+	dir2 = dir_between(pose.part(25).x, pose.part(25).y, pose.part(26).x, pose.part(26).y,
+											pose.part(22).x, pose.part(22).y, pose.part(24).x, pose.part(24).y)
 
-    x_circle, y_circle, radius = rad_circle(pose.part(17).x, pose.part(17).y,
-                                            pose.part(19).x, pose.part(19).y,
-                                            pose.part(21).x, pose.part(21).y, scale)
 
-    x_circle1, y_circle1, radius1 = rad_circle(pose.part(26).x, pose.part(26).y,
-                                               pose.part(24).x, pose.part(24).y,
-                                               pose.part(22).x, pose.part(22).y, scale)
+	eye_line1 = dir_between(pose.part(22).x, pose.part(22).y, pose.part(23).x, pose.part(23).y,
+													pose.part(22).x, pose.part(22).y, pose.part(26).x, pose.part(26).y)
 
-    eye_house = ((dir1 + dir2) / 2 - 20) * 1.7
-    eye_line = ((radius + radius1) / 2 - 20) * 1.7
-    eye_circle = 100 - eye_line
+	eye_line2 = dir_between(pose.part(21).x, pose.part(21).y, pose.part(20).x, pose.part(20).y,
+													pose.part(21).x, pose.part(21).y, pose.part(17).x, pose.part(17).y)
+	
 
-    diff = lined(pose.part(20).x, pose.part(20).y, pose.part(19).x, pose.part(19).y, pose.part(21).x, pose.part(21).y)
-    diff = abs(diff * 100 / scale_) / 10
-    eye_house *= 1 - diff
-    eye_circle *= 1 + diff
+	eye_house = (dir1 + dir2) / 2 * (0.5 + (dir1 + dir2) / 2 * 0.01)
 
-    eye_house, eye_circle, eye_line = clamp(eye_house, 0, 100), clamp(eye_circle, 0, 100), clamp(eye_line, 0, 100)
+	eye_circle = ((eye_line1 + eye_line2) / 2 - 12) * 3.44
 
-    return eye_house, eye_circle, eye_line
+	eye_line = 100 - eye_circle
+
+
+	eye_house, eye_circle, eye_line = clamp(eye_house, 0, 100), clamp(eye_circle, 0, 100), clamp(eye_line, 0, 100)
+
+	return eye_house, eye_circle, eye_line
 
 
 # Подбородок с ямкой
@@ -55,16 +53,25 @@ def fat_chin(pose, image):
     min_y = round(pose_max - vdist / 3)
     max_y = round(pose_max)
 
-    pit_color = get_color(min_x, max_x, min_y, max_y, image)
+    r, g, b = get_color(min_x, max_x, min_y, max_y, image, 3)
+
+    if r == -1:
+    	return -1
+
+    pit_color = sRGBColor(r / 255, g / 255, b / 255);
+    pit_color = convert_color(pit_color, LabColor)
 
     min_x = round(pose.part(8).x - hdist / 3)
     max_x = round(pose.part(8).x + hdist / 3)
     min_y = round(pose_max - vdist * (2 / 3))
     max_y = round(pose_max - vdist * (1 / 3))
 
-    chin_color = get_color(min_x, max_x, min_y, max_y, image)
+    r, g, b = get_color(min_x, max_x, min_y, max_y, image, 3)
 
-    return clamp((chin_color - pit_color + 50) / 2.5, 0, 100)
+    chin_color = sRGBColor(r / 255, g / 255, b / 255);
+    chin_color = convert_color(chin_color, LabColor)
+
+    return clamp((delta_e_cie2000(pit_color, chin_color) - 7) * 5 + 50, 0, 100)
 
 
 # Брови с подъёмом
@@ -119,15 +126,15 @@ def forhead_form(pose, image, scale):
 	forhead = [0, 0, 0]
 	forhead[0], forhead[1], forhead[2] = add_forehead(pose, image, scale)
 
-	if forhead[1].length == 16:
+	if forhead[1].length == 0:
 		#return "Лоб слишком тёмный, либо неправильный угол", "", ""
-		return "Error","Error","Error"
+		return -1,-1,-1
 
 	distance = lined(forhead[1].x, forhead[1].y, forhead[0].x, forhead[0].y, forhead[2].x, forhead[2].y) * 100/scale
 
-	fh_M = clamp((distance + 100) / 2, 0, 100)
-	fh_circle = clamp(100 - fh_M * (1 + (100 - fh_M) / 100), 0, 100)
-	fh_square = 100 - clamp(abs(distance) * 2, 0, 100)
+	fh_M = clamp((distance + 17) * 2, 0, 100)
+	fh_circle = clamp(-((distance - 17) * 2), 0, 100)
+	fh_square = 100 - clamp(abs(distance) * 6, 0, 100)
 
 	return fh_circle, fh_M, fh_square
 
@@ -137,11 +144,11 @@ def forhead_height(pose, image, scale):
 	forhead = [0, 0, 0]
 	forhead[0], forhead[1], forhead[2] = add_forehead(pose, image, scale)
 
-	if forhead[1].length == 16:
-		#return "Лоб слишком тёмный", "Лоб слишком тёмный"
-		return "Error","Error"
+	if forhead[1].length == 0:
+		return -1, -1
+
 	height = forhead[1].length
-	wide = clamp((height - 50) * 1.67, 0, 100)
+	wide = clamp((height - 24) * 2.5, 0, 100)
 	narrow = 100 - wide
 
 	return wide, narrow
@@ -181,7 +188,7 @@ def face_form(pose, image, scale):
 
 	fire = mean_square(100 - (dist1 - 130) * 2.5, (dist1 - dist3 + 30) * 1.67)
 
-	if forhead[1].length != 16:
+	if forhead[1].length != 0:
 		water *= dist2 / dist4
 		wind *= dist4 / dist2
 		fire *= (50 - abs(dist2 - dist4) * 5) / 100 + 1
@@ -199,12 +206,12 @@ def worlds(pose, image, scale):
 	material = distance(pose.part(8).x, pose.part(8).y, pose.part(30).x, pose.part(30).y) * 100/scale * 0.75
 	family = distance(pose.part(30).x, pose.part(30).y, pose.part(27).x, pose_brows_y) * 100/scale * 0.8
 
-	if forhead[1].length != 16:
-		spiritual = distance(pose.part(27).x, pose_brows_y, forhead[1].x, forhead[1].y) * 100/scale * 0.85
+	if forhead[1].length != 0:
+		spiritual = clamp(distance(pose.part(27).x, pose_brows_y, forhead[1].x, forhead[1].y) * 100/scale * 0.85, 0, 100)
 	else:
-		spiritual = "Лоб слишком тёмный,"
+		spiritual = -1
 
-	return clamp(spiritual, 0, 100), clamp(material, 0, 100), clamp(family, 0, 100)
+	return spiritual, clamp(material, 0, 100), clamp(family, 0, 100)
 	
 
 # Размер уха
@@ -218,7 +225,7 @@ def ear_size(pose, image, scale):
 
 	if (ear[0].x == 0) or (ear[1].x == 0):
 		#return "Фотография неправильного формата", "Фотография неправильного формата"
-		return "Error","Error"
+		return -1,-1
 	length = max(length1, length2)
 
 	length = clamp((length - 3) * 3.3, 0, 100)
@@ -233,7 +240,7 @@ def ear_check(pose, image, scale):
 
 	if max(ear[0].length, ear[2].length, ear[1].length, ear[3].length) == 0:
 		#return "Неправильный ракурс", "Неправильный ракурс"
-		return "Error","Error"
+		return -1,-1
 	result = clamp((max(ear[0].length - ear[2].length, ear[1].length - ear[3].length) - 5) * 3.3, 0, 100)
 
 
@@ -259,7 +266,7 @@ def earlobe_size(pose, image, scale):
 
 	if max(ear[0].length, ear[2].length, ear[1].length, ear[3].length) == 0:
 		#return "Неправильный ракурс", "Неправильный ракурс"
-		return "Error","Error"
+		return -1,-1
 	result = clamp(max(length1, length2) * 4.8, 0, 100)
 
 	return result, 100 - result

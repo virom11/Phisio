@@ -35,37 +35,55 @@ def clamp(val, small, big):
 
 
 # Взять цвет прямоугольника
-def get_color(min_x, max_x, min_y, max_y, image):
-    rs = 0
-    bs = 0
-    gs = 0
-    count = 0
-    for i in range(min_x, max_x):
-        for j in range(min_y, max_y):
-            r, g, b = image.getpixel((i, j))
-            rs += r
-            bs += b
-            gs += g
-            count += 1
+def get_color(min_x, max_x, min_y, max_y, image, value = 1):
+	rs = 0
+	bs = 0
+	gs = 0
+	count = 0
+	for i in range(min_x, max_x):
+		for j in range(min_y, max_y):
+			try:
+				r, g, b = image.getpixel((i, j))
+			except:
+				if value == 1:
+					return -1
+				elif value == 3:
+					return -1, -1, -1
+			rs += r
+			bs += b
+			gs += g
+			count += 1
 
-    return (rs + bs + gs) / count
+	if value == 1:
+		return (rs + bs + gs) / count
+	elif value == 3:
+		return rs / count, bs / count, gs / count
 
 
 # Взять доминантный цвет
-def get_dominate_color(min_x, max_x, min_y, max_y, image):
-    NUM_CLUSTERS = 1
+def get_dominate_color(min_x, max_x, min_y, max_y, image, value = 1):
+	NUM_CLUSTERS = 1
 
-    area = (min_x, min_y, max_x, max_y)
-    cropped_img = image.crop(area)
-    ar = np.asarray(cropped_img)
-    shape = ar.shape
-    ar = ar.reshape(scipy.product(shape[:2]), shape[2]).astype(float)
+	area = (min_x, min_y, max_x, max_y)
+	cropped_img = image.crop(area)
+	try:
+		ar = np.asarray(cropped_img)
+		shape = ar.shape
+		ar = ar.reshape(scipy.product(shape[:2]), shape[2]).astype(float)
+	except:
+		if value == 1:
+			return -1
+		elif value == 3:
+			return -1, -1, -1
 
-    codes, dist = scipy.cluster.vq.kmeans(ar, NUM_CLUSTERS)
-    print('cluster centres:\n', codes)
+	codes, dist = scipy.cluster.vq.kmeans(ar, NUM_CLUSTERS)
+  #print('cluster centres:\n', codes)
 
-    peak = codes[0]
-    return peak[0] + peak[1] + peak[2]
+	peak = codes[0]
+	if value == 1:
+		return peak[0] + peak[1] + peak[2]
+	elif value == 3:
+		return peak[0], peak[1], peak[2]
 
 
 # Расстояние между точками
@@ -82,6 +100,7 @@ def lengthDir(length, angle):
   radian_angle = math.radians(angle)
   return (length * math.cos(radian_angle), length * math.sin(radian_angle))
 
+
 # Насколько точка выше линии (Сначала)
 def lined(x, y, x1, y1, x2, y2):
     return y - ((((x - x1) * (y2 - y1)) / (x2 - x1)) + y1)
@@ -89,17 +108,27 @@ def lined(x, y, x1, y1, x2, y2):
 
 # Х, У, Радиус круга по трём точкам
 def rad_circle(x1, y1, x2, y2, x3, y3, scale):
-    x1, y1, x2, y2, x3, y3 = x1 * scale, y1 * scale, x2 * scale, y2 * scale, x3 * scale, y3 * scale
-    ma = (y2 - y1) / (x2 - x1)
-    mb = (y3 - y2) / (x3 - x2)
+	ma = (y2 - y1) / (x2 - x1)
+	mb = (y3 - y2) / (x3 - x2)
 
-    x = (ma * mb * (y1 - y3) + mb * (x1 + x2) - ma * (x2 + x3)) / (2 * (mb - ma))
+	x = (ma * mb * (y1 - y3) + mb * (x1 + x2) - ma * (x2 + x3)) / (2 * (mb - ma))
 
-    if ma == 0:
-        ma += 1
-    ya = -(1 / (ma)) * (x - (x1 + x2) / 2) + (y1 + y2) / 2
+	if ma == 0:
+		ya = (y2 + y1) / 2
+	else: 
+		ya = -(1 / (ma)) * (x - (x1 + x2) / 2) + (y1 + y2) / 2
 
-    return x, ya, distance(x, ya, x1, y1)
+	return x, ya, distance(x, ya, x1, y1)
+
+
+# Длина высоты
+def distance_height(x1, y1, x2, y2, x3, y3):
+	a = (y2 - y1) / (x2 - x1)
+	b = -1
+	c = (y1 * x2 - y2 * x1) / (x2 - x1)
+
+	return abs(a * x3 + b *	y3 + c) / math.sqrt(a*a + b*b)
+
 
 
 # Обращает в чёрно-белое
@@ -129,23 +158,53 @@ class Forehead(object):
     # The class "constructor" - It actually an initializer 
 		def __init__(self, pose, image, scale, pose_number, length = 15):
 
-			# Создание точкек лба
-			imageBW = black_white(image, 140)
 			dir_ = point_direction(pose.part(29).x, pose.part(29).y, pose.part(27).x, pose.part(27).y)
+			lendir_x, lendir_y = lengthDir(scale/50, dir_)
 
-			lendir_x, lendir_y = lengthDir(scale/100, dir_)
+			length = length
+			summ = 0
+			average = 0
 
 			x = pose.part(pose_number).x +  length * lendir_x
 			y = pose.part(pose_number).y +  length * lendir_y
+			r, g, b = image.getpixel((x, y))
+			color2_rgb = sRGBColor(r / 255, g / 255, b / 255);
 
-			while True:
+			while (length!=0):
+				try:
+					r, g, b = image.getpixel((x, y))
+				except:
+					x = 0
+					y = 0
+					length = 0
+					break
+				color1_rgb = sRGBColor(r / 255, g / 255, b / 255);
+
+				# Convert from RGB to Lab Color Space
+				color1_lab = convert_color(color1_rgb, LabColor);
+
+				# Convert from RGB to Lab Color Space
+				color2_lab = convert_color(color2_rgb, LabColor);
+
+				# Find the color difference
+				delta_e = delta_e_cie2000(color1_lab, color2_lab);
+
+				#if pose_number == 27:
+				#	print("The difference between the 2 color = ", delta_e)
+
+				if length > 18:
+					if (delta_e > average * 4 + 3) or (delta_e > 7):
+						break
+
+				summ += delta_e
+				length += 1
+				average = summ / length
+
+				color2_rgb = color1_rgb
+
 				x += lendir_x
 				y += lendir_y
-				length += 1
 
-				white = imageBW.getpixel((x, y))
-				if white == 0:
-					break
 
 			self.x = x
 			self.y = y
