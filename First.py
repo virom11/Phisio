@@ -15,9 +15,15 @@ from skimage import io
 from skimage.feature import hog
 import numpy as np
 import math
+from sys import platform
 
-ubuntu = True #Эта переменная используется для разработки на Ubuntu. 
-#Чтобы отключить подгон кода под особенности Ubuntu присвойте данной перменной значение False.
+#Автоматика для определения ситсемы, на которой запускается код
+if platform == "linux" or platform == "linux2":
+    ubuntu = True
+elif platform == "darwin":
+    # OS X
+elif platform == "win32" or platform == "win64":
+    ubuntu = False
 
 priznak = []
 for i in range(0, 66):
