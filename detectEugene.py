@@ -15,27 +15,19 @@ from scriptsEugene import *
 def eyebrows(pose, scale):
 	scale = 100 / scale
 
-	dir_ = point_direction(pose.part(27).x, pose.part(27).y, pose.part(29).x, pose.part(29).y)
-
 	dir1 = dir_between(pose.part(17).x, pose.part(17).y, pose.part(18).x, pose.part(18).y,
 											pose.part(21).x, pose.part(21).y, pose.part(19).x, pose.part(19).y)
 
 	dir2 = dir_between(pose.part(25).x, pose.part(25).y, pose.part(26).x, pose.part(26).y,
 											pose.part(22).x, pose.part(22).y, pose.part(24).x, pose.part(24).y)
 
-	x_circle, y_circle, radius = rad_circle(pose.part(17).x, pose.part(17).y,
-																					pose.part(19).x, pose.part(19).y,
-																					pose.part(21).x, pose.part(21).y, scale)
-
-	x_circle1, y_circle1, radius1 = rad_circle(pose.part(26).x, pose.part(26).y,
-																						pose.part(24).x, pose.part(24).y,
-																						pose.part(22).x, pose.part(22).y, scale)
 
 	eye_line1 = dir_between(pose.part(22).x, pose.part(22).y, pose.part(23).x, pose.part(23).y,
 													pose.part(22).x, pose.part(22).y, pose.part(26).x, pose.part(26).y)
 
 	eye_line2 = dir_between(pose.part(21).x, pose.part(21).y, pose.part(20).x, pose.part(20).y,
 													pose.part(21).x, pose.part(21).y, pose.part(17).x, pose.part(17).y)
+	
 
 	eye_house = (dir1 + dir2) / 2 * (0.5 + (dir1 + dir2) / 2 * 0.01)
 
