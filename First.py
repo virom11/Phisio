@@ -20,7 +20,7 @@ from sys import platform
 #Автоматика для определения ситсемы, на которой запускается код
 if platform == "linux" or platform == "linux2":
     ubuntu = True
-elif platform == "darwin":
+#elif platform == "darwin":
     # OS X
 elif platform == "win32" or platform == "win64":
     ubuntu = False
