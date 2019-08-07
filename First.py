@@ -39,16 +39,16 @@ min = 100
 
 if(ubuntu):
 
-    print('Ubuntu is used now.')
+	print('Ubuntu is used now.')
 
-    predictor_model = "/home/vector/Documents/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
-    #dir="/home/vector/Documents/Лоб/Прямой лоб"
-   dir="/home/vector/Documents/Веки/Закрытые посередине"
+	predictor_model = "/home/vector/Documents/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
+	#dir="/home/vector/Documents/Лоб/Прямой лоб"
+	dir="/home/vector/Documents/Веки/Закрытые посередине"
 
 else:
 
-    predictor_model = "C:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
-    dir="C:/Dropbox/Студенты/Брови/Домиком"
+	predictor_model = "C:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
+	dir="C:/Dropbox/Студенты/Брови/Прямые"
 
 
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
@@ -177,7 +177,7 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             '''
             priznak[44] = detectEugene.fat_chin(pose_landmarks, image1)
             print("Раздвоенный подбородок: ", priznak[44])
-
+            
             priznak[6] = detectEugene.eyebrows_rise(pose_landmarks, prop)
             print("Бровь с подъёмом: ", priznak[6])
 
