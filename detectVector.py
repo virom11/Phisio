@@ -80,8 +80,8 @@ def nose_size(predictor_model,file_name,pose_landmarks):
     tip=0
     dist=scriptsVector.distance(pose_landmarks.part(29).x,pose_landmarks.part(29).y,pose_landmarks.part(30).x,pose_landmarks.part(30).y)
     dist_control=scriptsVector.distance(pose_landmarks.part(30).x,pose_landmarks.part(30).y,pose_landmarks.part(33).x,pose_landmarks.part(33).y)
-    print('Distance: '+ str(dist))
-    print('Control distance: '+ str(dist_control))
+    #print('Distance: '+ str(dist))
+    #print('Control distance: '+ str(dist_control))
 
     if(dist_control==dist):
         big=50
@@ -92,8 +92,8 @@ def nose_size(predictor_model,file_name,pose_landmarks):
     elif(dist_control>dist):
         small=50+(dist_control-dist)/0.2
         big=100-small
-    print('big: '+ str(big))
-    print('small: '+ str(small))
+    #print('big: '+ str(big))
+    #print('small: '+ str(small))
     big,small=scriptsVector.range(big,small)
 
     if(big==100):
@@ -144,7 +144,7 @@ def nose_wings(predictor_model,file_name,pose_landmarks):
             maximum=average_s
 
         # Get the RGBA Value of the a pixel of an image
-        pix[pix_x,y] = (255,255,255)  # Set the RGBA Value of the image (tuple)
+        #pix[pix_x,y] = (255,255,255)  # Set the RGBA Value of the image (tuple)
         y-=1
     #print('minimal: '+str(minimal))
     #print('maximum: '+str(maximum))
@@ -152,7 +152,7 @@ def nose_wings(predictor_model,file_name,pose_landmarks):
         nose_wings=100
     else:
         nose_wings=(maximum-minimal)/0.4
-    im.save(file_name)
+    #im.save(file_name)
 
     return nose_wings
 

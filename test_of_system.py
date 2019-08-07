@@ -4,45 +4,90 @@
 
 import sys
 import dlib
-import detect
-import detectEugene
-import detectVector
 import os
 import openface
 import imageio
-from PIL import Image, ImageDraw
-from skimage import io
-from skimage.feature import hog
 import numpy as np
 import math
 import xlsxwriter
+import time
+from PIL import Image, ImageDraw
+from skimage import io
+from skimage.feature import hog
+
 import detect
 import detectEugene
 import detectVector
-import time
-
-amountsheet=0
+from features_list import features_list
 
 priznak = []
 for i in range(0, 66):
     priznak.append(0)  # Массив значений признаков
 
+file_num=0
 predictor_model = "/home/vector/Documents/shape_predictor_68_face_landmarks.dat"
+base="/home/vector/Documents/Проект/"
 
-workbook = xlsxwriter.Workbook('system_test.xlsx')
-cell_format = workbook.add_format()
-cell_format.set_font_color('red')
-worksheet = []
+max = 0
+min = 100
+f = open('tests/problems_photo')
+errors={}
+for line in f:
+    #print(line)
+    adress=""
+    result=""
+    flag = 0
+    if(".jpg" or ".jpeg")in line:
+        for symbol in line:
+            if(flag>=6):
+                result=result+symbol
+            else:
+                adress=adress+symbol 
+            if(symbol=="."):
+                flag+=1
+            elif((symbol=="j")and(flag>=1)):
+                flag+=1
+            elif((symbol=="p")and(flag>=1)):
+                flag+=1
+            elif((symbol=="g")and(flag>=1)):
+                flag+=1
+            elif((symbol==" ")and(flag>=1)):
+                flag+=10
+        errors[adress]=result
 
-def analyzer(control_string,dir,amountsheet):
-    worksheet.append(workbook.add_worksheet())
+for error in errors:
+    flag=0
+    final_result=""
+    comment=""
+    for symbol in errors[error]:
+        if(symbol==" "):
+            flag=1
+        if(flag!=1):
+            if(symbol=="1"):
+                final_result+="Неправильное определение точек лица. "
+            elif(symbol=="2"):
+                final_result+="Поврежденный файл. "
+            elif(symbol=="а"):
+                final_result+="Лицо закрыто другими объектами. "
+            elif(symbol=="б"):
+                final_result+="Неправильный ракурс. "
+            elif(symbol=="в"):
+                final_result+="Маленькое лицо, относительно фото. "
+            elif(symbol=="г"):
+                final_result+="Неизвестная причина. "
+            elif(symbol=="д"):
+                final_result+="Черно-белое фото. "   
+            elif(symbol=="е"):
+                final_result+="Плохое освещение. "
+        else:
+            comment=comment+symbol
+    final_result+=comment
+    errors[error]=final_result
 
-    worksheet[amountsheet].write(0, 0, "Number of photo in folder")
-    worksheet[amountsheet].write(1, 1, "File Name")
-    worksheet[amountsheet].write(1, 2,  "Found Error")
-    worksheet[amountsheet].write(1, 3,  "Test")
-    worksheet[amountsheet].write(1, 4,  "Result")
+
+def analyzer(control_string,dir,file_num):
     counter=1
+    file_num+=1
     row=1
     sum=0
     max=0
@@ -53,9 +98,20 @@ def analyzer(control_string,dir,amountsheet):
     errors_list_1=[]
     errors_list_2=[]
 
+    name='tests/system_test_'+str(file_num)+'.xlsx'
+    workbook = xlsxwriter.Workbook(name)
+    cell_format = workbook.add_format()
+    cell_format.set_font_color('red')
+    worksheet = workbook.add_worksheet()
+    worksheet.write(0, 0, "Номер")
+    worksheet.write(0, 1, "Имя файла")
+    worksheet.write(0, 2,  "Ошибка")
+    worksheet.write(0, 3,  "Тест")
+    worksheet.write(0, 4,  "Результат")
+    
     for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
         if(counter<10000):
-            if (filename.endswith("_hog.jpg")==0) and (filename.endswith("_detect.jpg")==0) and (filename.endswith("_aligned.jpg")==0) and ((filename in photo_with_errors)==0):  # Работаем только с оригиналом фото, не hog и не распознанное
+            if (filename.endswith("_hog.jpg")==0) and (filename.endswith("_detect.jpg")==0) and (filename.endswith("_aligned.jpg")==0) and ((filename in errors)==0):  # Работаем только с оригиналом фото, не hog и не распознанное
 
                 prop=0
                 pose_landmarks=0
@@ -84,9 +140,9 @@ def analyzer(control_string,dir,amountsheet):
 
                     prop = math.sqrt((pose_landmarks.part(57).x - pose_landmarks.part(27).x) ** 2 +
                                     (pose_landmarks.part(57).y - pose_landmarks.part(27).y) ** 2)# Измеряем размер лица чтобы получить относительные размеры черт лица
-                    worksheet[amountsheet].write(row, 0, counter)
-                    worksheet[amountsheet].write(row, 1, file_name)
-                    worksheet[amountsheet].write(row, 2,  "No")
+                    worksheet.write(row, 0, counter)
+                    worksheet.write(row, 1, file_name.replace("/home/vector/Documents", ""))
+                    worksheet.write(row, 2,  "Нет")
                     main=0
                     if(control_string == "Переносица с впадиной: "):
                         a, main = detectVector.nose(predictor_model, file_name,pose_landmarks)
@@ -94,12 +150,12 @@ def analyzer(control_string,dir,amountsheet):
                         main, a = detectVector.nose(predictor_model, file_name,pose_landmarks)
                     elif(control_string =="Крылья носа очерчены: "):
                         main = detectVector.nose_wings(predictor_model, file_name,pose_landmarks)
-                    #elif(control_string =="Брови Домиком: "):
-                    #    main, a, b = detectEugene.eyebrows(pose_landmarks, prop)
-                    #elif(control_string =="Брови Полукругом: "):                       Ошибка: неизвестная переменная scale_
-                    #    a, main, b = detectEugene.eyebrows(pose_landmarks, prop)
-                    #elif(control_string =="Брови Линией: "):
-                    #    a, b, main = detectEugene.eyebrows(pose_landmarks, prop)
+                    elif(control_string =="Брови Домиком: "):
+                        main, a, b = detectEugene.eyebrows(pose_landmarks, prop)
+                    elif(control_string =="Брови Полукругом: "):                       
+                        a, main, b = detectEugene.eyebrows(pose_landmarks, prop)
+                    elif(control_string =="Брови Линией: "):
+                        a, b, main = detectEugene.eyebrows(pose_landmarks, prop)
                     elif(control_string == "Прямой лоб : "):
                         main, a = detectVector.forehead(predictor_model, file_name,pose_landmarks)
                     elif(control_string == "Выпуклый лоб : "):
@@ -115,9 +171,9 @@ def analyzer(control_string,dir,amountsheet):
                     elif(control_string == "Раздвоенный подбородок: "):
                         main = detectEugene.fat_chin(pose_landmarks, image1)
                     elif(control_string == "Лоб Узкий: "):
-                        a, main = detectVector.nose(predictor_model, file_name,pose_landmarks)
+                        a, main = detectEugene.forhead_height(pose_landmarks, image1, prop)
                     elif(control_string == "Лоб Широкий: "):
-                        main, a = detectVector.nose(predictor_model, file_name,pose_landmarks)
+                        main, a = detectEugene.forhead_height(pose_landmarks, image1, prop)
                     elif(control_string == "Духовный : "):
                         main, a, b  = detectEugene.worlds(pose_landmarks, image1, prop)
                     elif(control_string == " Материальный: "):
@@ -182,8 +238,49 @@ def analyzer(control_string,dir,amountsheet):
                         main = 100-detect.chin_form(pose_landmarks, prop)
                     elif(control_string == "Круглый подбородок: "):
                         main = detect.chin_form(pose_landmarks, prop)
-            
-                    worksheet[amountsheet].write(row, 3, control_string)
+                    elif(control_string == "Уголки губ вверх: "):
+                        left =detect.left_lips_ugolki(pose_landmarks, prop)
+                        right = detect.right_lips_ugolki(pose_landmarks, prop)
+                        d=(left+right)/2
+                        if d>0:
+                            var_25=d
+                            var_26=0
+                            if d<20: var_27=100-d*5
+                        if (d<0):
+                            var_25=0
+                            var_26 = d
+                            if d<20: priznak[27]=100-d*5
+                        main = var_25
+                    elif(control_string == "Уголки губ вниз: "):
+                        left =detect.left_lips_ugolki(pose_landmarks, prop)
+                        right = detect.right_lips_ugolki(pose_landmarks, prop)
+                        d=(left+right)/2
+                        if d>0:
+                            var_25=d
+                            var_26=0
+                            if d<20: var_27=100-d*5
+                        if (d<0):
+                            var_25=0
+                            var_26 = d
+                            if d<20: priznak[27]=100-d*5
+                        main = var_26
+                    elif(control_string == "Уголки губ вниз: "):
+                        left =detect.left_lips_ugolki(pose_landmarks, prop)
+                        right = detect.right_lips_ugolki(pose_landmarks, prop)
+                        d=(left+right)/2
+                        if d>0:
+                            var_25=d
+                            var_26=0
+                            if d<20: var_27=100-d*5
+                        if (d<0):
+                            var_25=0
+                            var_26 = d
+                            if d<20: priznak[27]=100-d*5
+                        main = var_27
+                    elif(control_string == "Сросшиеся брови: "):
+                        main = detect.eyebrows_accreted(pose_landmarks, image1)
+                        
+                    worksheet.write(row, 3, control_string)
                     if(main != "Error"):
                         sum=sum+main
                         digits.append(main)
@@ -195,7 +292,7 @@ def analyzer(control_string,dir,amountsheet):
                             above+=1
                         if(main<50):
                             below+=1
-                        worksheet[amountsheet].write(row, 4,  str(main))
+                        worksheet.write(row, 4,  str(main))
                         counter+=1
                         row+=1
                     #print(counter)
@@ -203,166 +300,63 @@ def analyzer(control_string,dir,amountsheet):
             break
 
     for error in errors_list_1:
-        worksheet[amountsheet].write(row, 0, counter,cell_format)
-        worksheet[amountsheet].write(row, 1, file_name,cell_format)
-        worksheet[amountsheet].write(row, 2,  "Faces not found",cell_format)
+        worksheet.write(row, 0, counter,cell_format)
+        worksheet.write(row, 1, file_name.replace("/home/vector/Documents", ""),cell_format)
+        worksheet.write(row, 2,  "Лицо не найдено",cell_format)
         counter+=1
         row+=1
 
     for error in errors_list_2:
-        worksheet[amountsheet].write(row, 0, counter,cell_format)
-        worksheet[amountsheet].write(row, 1, file_name,cell_format)
-        worksheet[amountsheet].write(row, 2,  "Too many faces",cell_format)
+        worksheet.write(row, 0, counter,cell_format)
+        worksheet.write(row, 1, file_name.replace("/home/vector/Documents", ""),cell_format)
+        worksheet.write(row, 2,  "Найдено больше одного лица",cell_format)
         counter+=1
         row+=1
+    
+    for adress in errors:   
+        if(features_list[control_string] in adress):
+            worksheet.write(row, 0, counter,cell_format)
+            worksheet.write(row, 1, (base+adress).replace("/home/vector/Documents", ""),cell_format)
+            worksheet.write(row, 2, errors[adress],cell_format)
+            counter+=1
+            row+=1
+    
             
     average=sum/counter
-    worksheet[amountsheet].write(row, 0,  "Average")
-    worksheet[amountsheet].write(row, 1,  average)
+    worksheet.write(row, 0,  "Среднее значение")
+    worksheet.write(row, 1,  average)
     row+=1
-    worksheet[amountsheet].write(row, 0,  "MAX")
-    worksheet[amountsheet].write(row, 1,  max)
+    worksheet.write(row, 0,  "Максимальное значение")
+    worksheet.write(row, 1,  max)
     row+=1
-    worksheet[amountsheet].write(row, 0,  "MIN")
-    worksheet[amountsheet].write(row, 1,  min)
+    worksheet.write(row, 0,  "Минимальное значение")
+    worksheet.write(row, 1,  min)
     row+=1
-    worksheet[amountsheet].write(row, 0,  "Above 50")
-    worksheet[amountsheet].write(row, 1,  above)
+    worksheet.write(row, 0,  "Количество элементов выше 50")
+    worksheet.write(row, 1,  above)
     row+=1
-    worksheet[amountsheet].write(row, 0,  "Below 50")
-    worksheet[amountsheet].write(row, 1,  below)
+    worksheet.write(row, 0,  "Количество элементов ниже 50")
+    worksheet.write(row, 1,  below)
     digits=sorted(digits, key=int)
     median=digits[len(digits)//2]
     row+=1
-    worksheet[amountsheet].write(row, 0,  "Median")
-    worksheet[amountsheet].write(row, 1,  median)
-    amountsheet+=1
-    return amountsheet
+    worksheet.write(row, 0,  "Медиана")
+    worksheet.write(row, 1,  median)
 
-base="/home/vector/Documents/Проект/"
-features_list={"Переносица с впадиной: ": "Нос/Переносица с впадиной",
-"Прямой нос: ":"Нос/Прямой нос",
-"Крылья носа очерчены: ":"Нос/Крылья носа очерчены",
-"Брови Домиком: ":"Брови/Домиком",
-"Брови Полукругом: ":"Брови/Полукруглые",
-"Брови Линией: ":"Брови/Прямые",
-"Прямой лоб : ":"Лоб/Прямой лоб",
-"Выпуклый лоб : ":"Лоб/Выпуклый лоб",
-"Нос картошкой: ":"Нос/Нос картошкой",
-"Курносый нос: ":"Нос/Курносый нос",
-"Кончик носа вниз: ":"Нос/Кончик носа вниз",
-"Бровь с подъёмом: ":"Брови/С подъемом",
-"Раздвоенный подбородок: ":"Подбородок/Раздвоенный с вмятиной",
-"Лоб Широкий: ":"Лоб/Широкий лоб",
-"Лоб Узкий: ":"Лоб/Узкий лоб",
-"Духовный : ":"Миры/Духовный",
-" Материальный: ":"Миры/Материальный",
-" Семейный: ":"Миры/Семейный",
-"Волосы лба Полукругом: ":"Лоб/Полукруглой рост волос",
-" Буквой М: ":"Лоб/Волосы буквой М",
-"Квадратный: ":"Лоб/Квадратный рост волос",
-"Горбинка на носу: ":"Нос/Нос с горбинкой",
-"Скулы выше уровня глаз: ":"Скулы/Скулы выше уровня глаз",
-"Скулы на уровне глаз: ":"Скулы/Скулы на уровне глаз",
-"Скулы ниже уровня глаз: ":"Скулы/Скулы ниже уровня глаз",
-"Брови тёмные, густые:" :"Брови/Темные густые",
-"Брови светлые, редкие:":"Брови/Светлые редкие",
-"Прижатые уши: ":"Уши/прижатые Уши",
-"Квадратная мочка уха: ":"Уши/Квадратная мочка уха",
-"Мочка уха большая: ":"Уши/Большая мочка уха",
-"Мочка уха маленькая: ":"Уши/Маленькая мочка уха",
-"Верхняя губа с галочкой: ": "Губы/Верхняя губа с галочкой", 
-"Прямая верхняя губа: ": "Губы/Прямая верхняя губа", 
-"Толстая верхняя губа: ": "Губы/Толстая верхняя губа", 
-"Тонкая верхняя губа: " : "Губы/Тонкая верхняя губа", 
-"Уголки губ вверх: " : "Губы/Уголки губ вверх", 
-"Уголки губ вниз: " : "Губы/Уголки губ вниз", 
-"Уголки губ прямо: " : "Губы/Уголки губ прямые", 
-"Близко-посаженные глаза: " : "Глаза/Близкая посадка глаз", 
-"Широко-посаженные глаза: " : "Глаза/широкая посадка глаз", 
-"Голубые глаза: " : "Глаза/Голубые", 
-"Зеленые глаза: " : "Глаза/Зеленые", 
-"Карие и черные глаза: " : "Глаза/Карие и черные", 
-"Серые глаза: " : "Глаза/Серые", 
-"Большой подбородок: " : "Подбородок/большой подбородок", 
-"Маленький подбородок: " : "Подбородок/Маленький подбородок", 
-"Квадратный подбородок: " : "Подбородок/Квадратный", 
-"Круглый подбородок: " : "Подбородок/Круглый", 
-"Сросшиеся брови: " : "Брови/Сросшиеся"}
+    workbook.close()
+    return file_num
 
 
-photo_with_errors={
-"/home/vector/Documents/Проект/Брови/Домиком/1.jpg",
-"/home/vector/Documents/6pBSWfFebRU.jpg", 
-"/home/vector/Documents/17_449160.jpg", 
-"/home/vector/Documents/340x464_0xd42ee42a_10290128931424358864.jpeg", 
-"/home/vector/Documents/Проект/Брови/Домиком/36918962_2521241227901897_7814025260801458176_n.jpg", 
-"/home/vector/Documents/Проект/Брови/Домиком/JQaJYKXtS_4.jpg", 
-"/home/vector/Documents/Проект/Брови/Домиком/nd4sOTfSV3c.jpg", 
-"/home/vector/Documents/Проект/Брови/Домиком/OmUdqyA0ws4.jpg", 
-"/home/vector/Documents/Проект/Брови/Домиком/orig55646.jpg", 
-"/home/vector/Documents/Проект/Брови/Домиком/Безымянный98.jpg",
-"/home/vector/Documents/Проект/Брови/С подъемом/0ZN2t5dntmE.jpg", 
-"/home/vector/Documents/Проект/Брови/С подъемом/1qfl2CR5sfk.jpg", 
-"/home/vector/Documents/Проект/Брови/С подъемом/2M60jdnNJP8.jpg", 
-"/home/vector/Documents/Проект/Брови/С подъемом/3dQWpz_RqSg.jpg", 
-"/home/vector/Documents/Проект/Брови/С подъемом/HVFmT23QktE.jpg", 
-"/home/vector/Documents/Проект/Брови/С подъемом/j9ZWI4shJnk.jpg", 
-"/home/vector/Documents/Проект/Брови/С подъемом/onL2ilSIg5w.jpg", 
-"/home/vector/Documents/Проект/Брови/С подъемом/PtVEJ_03jwM.jpg", 
-"/home/vector/Documents/Проект/Брови/С подъемом/TFA-4boN-2Q.jpg", 
-"/home/vector/Documents/Проект/Брови/С подъемом/uLTkZhDauBU.jpg", 
-"/home/vector/Documents/Проект/Брови/С подъемом/xWBzBOBWF_8.jpg"
-}
 
-
-start_time=time.time()
-control_string="Бровь с подъёмом"
-dir=base+"Брови/С подъемом"
-amountsheet=analyzer(control_string,dir,amountsheet)
-hours=int(time.time()-start_time)//3600
-minutes=int(time.time()-start_time)//60
-print("Time passed: " + str(hours) + ":" + str(minutes) + ":" + str(int((time.time()-start_time)%3600)))
-
-'''
 j=0
-
-print('Number of folders: ' + str(len(features_list)))
+print('Number of analyzed functions: ' + str(len(features_list)))
 start_time=time.time()
 for i in features_list:
     hours=int(time.time()-start_time)//3600
     minutes=int(time.time()-start_time)//60
     j+=1
     print('Number of folder: ' + str(j))
-    print("Time passed: " + str(hours) + ":" + str(minutes) + ":" + str(int((time.time()-start_time))%3600))
+    print("Time passed: " + str(hours) + ":" + str(minutes) + ":" + str(int((time.time()-start_time))%60))
     control_string=i
     dir=base+features_list[i]
-    amountsheet=analyzer(control_string,dir,amountsheet)
-'''
-
-workbook.close()
-
-
-
-
-'''
-                left =detect.left_lips_ugolki(pose_landmarks, prop)
-                right = detect.right_lips_ugolki(pose_landmarks, prop)
-                d=(left+right)/2
-                if d>0:
-                    priznak[25]=d
-                    priznak[26]=0
-                    if d<20: priznak[27]=100-d*5
-                if (d<0):
-                    priznak[25]=0
-                    priznak[26] = d
-                    if d<20: priznak[27]=100-d*5
-                print("Уголки губ вверх: ", priznak[25])
-                print("Уголки губ вниз: ", priznak[26])
-                print("Уголки губ прямо: ", priznak[27])
-
-                priznak[8] = detect.eyebrows_accreted(pose_landmarks, image1)
-                print("Сросшиеся брови: ", priznak[8])
-                if priznak[8]>max: max=priznak[8]
-                if priznak[8] < min: min = priznak[8]
-'''  
+    file_num=analyzer(control_string,dir,file_num)
