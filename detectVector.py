@@ -243,7 +243,10 @@ def forehead(predictor_model,file_name,pose_landmarks):
     while((x<x2) and (x>0)):
         y=round((((y2-y1)*(x-x1))+yn*(x2-x1))/(x2-x1))
         second_color=pix[x,y]
+        #print('x: '+str(x))
+        #print('y: '+str(y))
         average_s=(second_color[0]+second_color[1]+second_color[2])/3
+        #print('average_s: '+str(average_s))
         if(average_s<min):
             min=average_s
         if(average_s>max):
@@ -254,7 +257,9 @@ def forehead(predictor_model,file_name,pose_landmarks):
         smooth=0
     else:
         smooth=100
-    convex=100-0
+    convex=100-smooth
+    #print('smooth: '+str(smooth))
+    #print('convex: '+str(convex))
         
     #im.save(file_name)
     return smooth,convex

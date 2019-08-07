@@ -110,9 +110,16 @@ def analyzer(control_string,dir,file_num):
     worksheet.write(0, 4,  "Результат")
     
     for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
-        if(counter<10000):
-            if (filename.endswith("_hog.jpg")==0) and (filename.endswith("_detect.jpg")==0) and (filename.endswith("_aligned.jpg")==0) and ((filename in errors)==0):  # Работаем только с оригиналом фото, не hog и не распознанное
 
+        some_str=(dir+"/"+filename).replace("/home/vector/Documents/Проект/", "")
+        global_flag=0
+        for err in errors:
+            if some_str in err:
+                global_flag=1
+            
+        if(counter<10000):
+
+            if (filename.endswith("_hog.jpg")==0) and (filename.endswith("_detect.jpg")==0) and (filename.endswith("_aligned.jpg")==0) and (global_flag==0):  # Работаем только с оригиналом фото, не hog и не распознанное
                 prop=0
                 pose_landmarks=0
                 detected_faces=[]
@@ -126,13 +133,14 @@ def analyzer(control_string,dir,file_num):
                 face_pose_predictor = dlib.shape_predictor(predictor_model) # Модель распознавания лица
                 detected_faces = face_detector(image, 1) # Находим лица, что такое "1" - не помню
 
-                if len(detected_faces) == 0:
+                if len(detected_faces) == 0 and ((file_name in errors_list_1)==0):
                     #print("Лица на фото не обнаружено")
                     errors_list_1.append(file_name)
 
-                if len(detected_faces) > 1:
+                if len(detected_faces) > 1 and ((file_name in errors_list_2)==0):
                     #print("Обнаружено более одного лица")
                     errors_list_2.append(file_name)
+                
 
                 if len(detected_faces) == 1: # Если лицо одно, то продолжаем
                     for i, face_rect in enumerate(detected_faces):
@@ -301,14 +309,14 @@ def analyzer(control_string,dir,file_num):
 
     for error in errors_list_1:
         worksheet.write(row, 0, counter,cell_format)
-        worksheet.write(row, 1, file_name.replace("/home/vector/Documents", ""),cell_format)
+        worksheet.write(row, 1, error.replace("/home/vector/Documents", ""),cell_format)
         worksheet.write(row, 2,  "Лицо не найдено",cell_format)
         counter+=1
         row+=1
 
     for error in errors_list_2:
         worksheet.write(row, 0, counter,cell_format)
-        worksheet.write(row, 1, file_name.replace("/home/vector/Documents", ""),cell_format)
+        worksheet.write(row, 1, error.replace("/home/vector/Documents", ""),cell_format)
         worksheet.write(row, 2,  "Найдено больше одного лица",cell_format)
         counter+=1
         row+=1
