@@ -34,7 +34,7 @@ def eyebrows(pose, scale):
     eye_circle = 100 - eye_line
 
     diff = lined(pose.part(20).x, pose.part(20).y, pose.part(19).x, pose.part(19).y, pose.part(21).x, pose.part(21).y)
-    diff = abs(diff * 100 / scale_) / 10
+    diff = abs(diff * scale) / 10
     eye_house *= 1 - diff
     eye_circle *= 1 + diff
 
@@ -119,9 +119,9 @@ def forhead_form(pose, image, scale):
 	forhead = [0, 0, 0]
 	forhead[0], forhead[1], forhead[2] = add_forehead(pose, image, scale)
 
-	if forhead[1].length == 16:
+	if forhead[1].length == 0:
 		#return "Лоб слишком тёмный, либо неправильный угол", "", ""
-		return "Error","Error","Error"
+		return -1,-1,-1
 
 	distance = lined(forhead[1].x, forhead[1].y, forhead[0].x, forhead[0].y, forhead[2].x, forhead[2].y) * 100/scale
 
@@ -137,11 +137,11 @@ def forhead_height(pose, image, scale):
 	forhead = [0, 0, 0]
 	forhead[0], forhead[1], forhead[2] = add_forehead(pose, image, scale)
 
-	if forhead[1].length == 16:
-		#return "Лоб слишком тёмный", "Лоб слишком тёмный"
-		return "Error","Error"
+	if forhead[1].length == 0:
+		return -1, -1
+
 	height = forhead[1].length
-	wide = clamp((height - 50) * 1.67, 0, 100)
+	wide = clamp((height - 24) * 2.5, 0, 100)
 	narrow = 100 - wide
 
 	return wide, narrow
@@ -218,7 +218,7 @@ def ear_size(pose, image, scale):
 
 	if (ear[0].x == 0) or (ear[1].x == 0):
 		#return "Фотография неправильного формата", "Фотография неправильного формата"
-		return "Error","Error"
+		return -1,-1
 	length = max(length1, length2)
 
 	length = clamp((length - 3) * 3.3, 0, 100)
@@ -233,7 +233,7 @@ def ear_check(pose, image, scale):
 
 	if max(ear[0].length, ear[2].length, ear[1].length, ear[3].length) == 0:
 		#return "Неправильный ракурс", "Неправильный ракурс"
-		return "Error","Error"
+		return -1,-1
 	result = clamp((max(ear[0].length - ear[2].length, ear[1].length - ear[3].length) - 5) * 3.3, 0, 100)
 
 
@@ -259,7 +259,7 @@ def earlobe_size(pose, image, scale):
 
 	if max(ear[0].length, ear[2].length, ear[1].length, ear[3].length) == 0:
 		#return "Неправильный ракурс", "Неправильный ракурс"
-		return "Error","Error"
+		return -1,-1
 	result = clamp(max(length1, length2) * 4.8, 0, 100)
 
 	return result, 100 - result

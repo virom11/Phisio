@@ -6,9 +6,9 @@ import sys
 import dlib
 import detect
 import detectEugene
-import detectVector
+#import detectVector
 import os
-import openface
+#import openface
 import imageio
 from PIL import Image, ImageDraw
 from skimage import io
@@ -16,7 +16,7 @@ from skimage.feature import hog
 import numpy as np
 import math
 
-ubuntu = True #Эта переменная используется для разработки на Ubuntu. 
+ubuntu = False #Эта переменная используется для разработки на Ubuntu. 
 #Чтобы отключить подгон кода под особенности Ubuntu присвойте данной перменной значение False.
 
 priznak = []
@@ -37,12 +37,12 @@ if(ubuntu):
 
     predictor_model = "/home/vector/Documents/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
     #dir="/home/vector/Documents/Лоб/Прямой лоб"
-    dir="/home/vector/Documents/Веки/Закрытые посередине"
+   dir="/home/vector/Documents/Веки/Закрытые посередине"
 
 else:
 
-    predictor_model = "D:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
-    dir="D:/Dropbox/Студенты/Уши/Маленькая мочка уха"
+    predictor_model = "C:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
+    dir="C:/Dropbox/Студенты/Брови/Домиком"
 
 
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
@@ -165,10 +165,10 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             print("Сросшиеся брови: ", priznak[8])
             if priznak[8]>max: max=priznak[8]
             if priznak[8] < min: min = priznak[8]
-
+            '''
             priznak[3], priznak[4], priznak[5] = detectEugene.eyebrows(pose_landmarks, prop)
             print("Бровин Домиком: ", priznak[3], "Бровин Полукругом: ", priznak[4], "Бровин Линией: ", priznak[5])
-
+            '''
             priznak[44] = detectEugene.fat_chin(pose_landmarks, image1)
             print("Раздвоенный подбородок: ", priznak[44])
 
@@ -224,8 +224,8 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             #priznak[33],priznak[31] = detectVector.forehead(predictor_model, file_name,pose_landmarks)
             #print("Прямой лоб : ", priznak[33],"Выпуклый лоб : ", priznak[31])
 
-            priznak[15],priznak[13], priznak[14] = detectVector.eyelids(predictor_model, file_name,pose_landmarks)
-            print("Веки, закрытые внутри : ", priznak[15],"Веки, закрытые посередине  : ", priznak[13],"Веки, закрытые снаружи  : ", priznak[14])
+            #priznak[15],priznak[13], priznak[14] = detectVector.eyelids(predictor_model, file_name,pose_landmarks)
+            #print("Веки, закрытые внутри : ", priznak[15],"Веки, закрытые посередине  : ", priznak[13],"Веки, закрытые снаружи  : ", priznak[14])
             #ВЕКАМ ТРЕБУЮТСЯ ФИКСЫ
 
             count_ += 1
