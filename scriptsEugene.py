@@ -167,8 +167,11 @@ class Forehead(object):
 
 			x = pose.part(pose_number).x +  length * lendir_x
 			y = pose.part(pose_number).y +  length * lendir_y
-			r, g, b = image.getpixel((x, y))
-			color2_rgb = sRGBColor(r / 255, g / 255, b / 255);
+			try:
+				r, g, b = image.getpixel((x, y))
+				color2_rgb = sRGBColor(r / 255, g / 255, b / 255);
+			except:
+				print('error')
 
 			while (length!=0):
 				try:
@@ -234,8 +237,11 @@ def eyebrows_height_1(pose, image, scale, pose_number1 = 20, pose_number2 = 38):
 	x = pose.part(pose_number1).x +  length * lendir_x
 	y = pose.part(pose_number1).y +  length * lendir_y
 
-	r, g, b = image.getpixel((x, y))
-	color2_rgb = sRGBColor(r / 255, g / 255, b / 255);
+	try:
+		r, g, b = image.getpixel((x, y))
+		color2_rgb = sRGBColor(r / 255, g / 255, b / 255);
+	except:
+		return 0
 
 	for i in range(pose.part(pose_number1).y, pose.part(pose_number2).y):
 		r, g, b = image.getpixel((x, y))
@@ -290,8 +296,11 @@ class Ear(object):
 			x = pose.part(pose_number1).x +  length * lendir_x
 			y = pose.part(pose_number1).y +  length * lendir_y
 
-			r, g, b = image.getpixel((x, y))
-			color2_rgb = sRGBColor(r / 255, g / 255, b / 255);
+			try:
+				r, g, b = image.getpixel((x, y))
+				color2_rgb = sRGBColor(r / 255, g / 255, b / 255);
+			except:
+				print('error')
 
 			for i in range(0, 50):
 				try:
@@ -357,8 +366,11 @@ def ear_height(pose, image, scale, x, y):
 	x = x +  length * lendir_x
 	y = y +  length * lendir_y
 
-	r, g, b = image.getpixel((x, y))
-	color2_rgb = sRGBColor(r / 255, g / 255, b / 255);
+	try:
+		r, g, b = image.getpixel((x, y))
+		color2_rgb = sRGBColor(r / 255, g / 255, b / 255);
+	except:
+		return 0
 
 	for i in range(0, 50):
 		r, g, b = image.getpixel((x, y))

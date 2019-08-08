@@ -6,9 +6,9 @@ import sys
 import dlib
 import detect
 import detectEugene
-import detectVector
+#import detectVector
 import os
-import openface
+#import openface
 import imageio
 from PIL import Image, ImageDraw
 from skimage import io
@@ -48,7 +48,7 @@ if(ubuntu):
 else:
 
 	predictor_model = "C:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
-	dir="C:/Dropbox/Студенты/Брови/Прямые"
+	dir="C:/Dropbox/Студенты/Глаза/Голубые"
 
 
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
@@ -151,13 +151,13 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             priznak[12] = 100-priznak[20]
             print("Близко-посаженные глаза: ", priznak[12])
             print("Широко-посаженные глаза: ", priznak[20])
-
-            priznak[16],priznak[17],priznak[18],priznak[19]=detect.eye_color(pose_landmarks, image1)
+            '''
+            priznak[16],priznak[17],priznak[18],priznak[19]=detectEugene.eye_color(pose_landmarks, image1)
             print("Голубые глаза: ", priznak[16])
             print("Зеленые глаза: ", priznak[17])
             print("Карие и черные глаза: ", priznak[18])
             print("Серые глаза: ", priznak[19])
-
+            '''
             priznak[40] =detect.chin_size(pose_landmarks, prop)
             priznak[43] = 100 - priznak[40]
             print("Большой подбородок: ", priznak[40])
@@ -171,31 +171,31 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             print("Сросшиеся брови: ", priznak[8])
             if priznak[8]>max: max=priznak[8]
             if priznak[8] < min: min = priznak[8]
-            '''
+
             priznak[3], priznak[4], priznak[5] = detectEugene.eyebrows(pose_landmarks, prop)
             print("Бровин Домиком: ", priznak[3], "Бровин Полукругом: ", priznak[4], "Бровин Линией: ", priznak[5])
-            '''
+
             priznak[44] = detectEugene.fat_chin(pose_landmarks, image1)
             print("Раздвоенный подбородок: ", priznak[44])
             
             priznak[6] = detectEugene.eyebrows_rise(pose_landmarks, prop)
             print("Бровь с подъёмом: ", priznak[6])
-
+            
             priznak[7], priznak[9] = detectEugene.eyebrows_bold(pose_landmarks, image1)
             print("Брови тёмные, густые:", priznak[9], "Брови светлые, редкие:", priznak[7])
             
             priznak[32], priznak[34], priznak[55] = detectEugene.forhead_form(pose_landmarks, image1, prop) #круг, М, квадрат
             print("Волосы лба Полукругом: ", priznak[32], " Буквой М: ", priznak[34], "Квадратный: ", priznak[55])
-            
+
             priznak[35], priznak[56] = detectEugene.forhead_height(pose_landmarks, image1, prop)
             print("Лоб Широкий: ", priznak[35], "Лоб Узкий: ", priznak[56])
-            
+
             priznak[10], priznak[11] = detectEugene.eyebrows_height(pose_landmarks, image1, prop)
             print("Тонкие брови: ", priznak[10], " Широкие брови: ", priznak[11])
-            
+
             priznak[51], priznak[52], priznak[53] = detectEugene.face_form(pose_landmarks, image1, prop)
             print("Вода на: ", priznak[51]," Ветер на: ", priznak[52]," Огонь на: ", priznak[53])
-            
+                
             priznak[57], priznak[58], priznak[59] = detectEugene.worlds(pose_landmarks, image1, prop)
             print("Духовный : ", priznak[57]," Материальный: ", priznak[58]," Семейный: ", priznak[59])
             

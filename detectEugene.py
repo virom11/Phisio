@@ -220,13 +220,13 @@ def ear_size(pose, image, scale):
 	ear[0], ear[1], ear[2], ear[3] = add_ear(pose, image, scale)
 
 	length1 = ear[0].length
-	length2 = ear[0].length
+	length2 = ear[1].length
 
+	length = max(length1, length2)
 
-	if (ear[0].x == 0) or (ear[1].x == 0):
+	if length == 0:
 		#return "Фотография неправильного формата", "Фотография неправильного формата"
 		return -1,-1
-	length = max(length1, length2)
 
 	length = clamp((length - 3) * 3.3, 0, 100)
 
@@ -238,7 +238,7 @@ def ear_check(pose, image, scale):
 	ear = [0, 0, 0, 0]
 	ear[0], ear[1], ear[2], ear[3] = add_ear(pose, image, scale)
 
-	if max(ear[0].length, ear[2].length, ear[1].length, ear[3].length) == 0:
+	if max(ear[0].length, ear[1].length) == 0 and max(ear[2].length, ear[3].length) == 0:
 		#return "Неправильный ракурс", "Неправильный ракурс"
 		return -1,-1
 	result = clamp((max(ear[0].length - ear[2].length, ear[1].length - ear[3].length) - 5) * 3.3, 0, 100)
@@ -284,3 +284,32 @@ def cheekbones(pose, image, scale):
 	result2 = 100 - result1 
 
 	return result1, result2, result3
+
+
+
+def eye_color(pose, im):
+
+	rs1, gs1, bs1 = get_dominate_color(pose.part(43).x, pose.part(46).x,
+																	pose.part(43).y, pose.part(46).y, im, 3)
+
+	rs2, gs2, bs2 = get_dominate_color(pose.part(37).x, pose.part(40).x,
+																	pose.part(37).y, pose.part(40).y, im, 3)
+
+	rs, gs, bs = (rs1 + rs2) / 2, (gs1 + gs2) / 2, (bs1 + bs2) / 2
+
+	gol = 50 + (bs-gs)+(bs-rs)
+
+	zel = 50 + (gs-bs)+(gs-rs)
+
+	kar = 50 + (rs-bs)+(rs-gs)
+
+	ser = 100 - (abs(gs-rs)+abs(bs-rs)) * 1.67
+
+	max_ = max(gol, zel, kar, ser)
+	if max_ > 100:
+		k = max_ / 100
+		gol, zel, kar, ser = gol / k, zel / k, kar / k, ser / k
+
+	gol, zel, kar, ser = clamp(gol, 0, 100), clamp(zel, 0, 100), clamp(kar, 0, 100), clamp(ser, 0, 100)
+
+	return gol, zel, kar, ser

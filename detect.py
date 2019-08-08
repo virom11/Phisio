@@ -108,16 +108,13 @@ def eye_color(pose_landmarks, im):
     rs=rs / count
     gs=gs / count
     bs=bs / count
-    gol=0
-    zel=0
-    kar=0
-    ser=0
+  
     gol=(bs-gs)+(bs-rs)
-    if gol>100: gol=100
+    
     zel=(gs-bs)+(gs-rs)
-    if zel > 100: zel = 100
+    
     kar=(rs-bs)+(rs-gs)
-    if kar > 100: kar = 100
+    
     ser=100-(abs(gs-rs)+abs(bs-bs))
     return (gol,zel,kar,ser)
 
