@@ -49,7 +49,7 @@ if(ubuntu):
 else:
 
 	predictor_model = "C:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
-	dir="C:/Dropbox/Студенты/Брови/Домиком"
+	dir="C:/Dropbox/Студенты/Лоб/Квадратный рост волос"
 
 
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
@@ -172,10 +172,10 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             print("Сросшиеся брови: ", priznak[8])
             if priznak[8]>max: max=priznak[8]
             if priznak[8] < min: min = priznak[8]
-            '''
+            
             priznak[3], priznak[4], priznak[5] = detectEugene.eyebrows(pose_landmarks, prop)
             print("Бровин Домиком: ", priznak[3], "Бровин Полукругом: ", priznak[4], "Бровин Линией: ", priznak[5])
-            '''
+            
             priznak[44] = detectEugene.fat_chin(pose_landmarks, image1)
             print("Раздвоенный подбородок: ", priznak[44])
             
@@ -184,10 +184,10 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             
             priznak[7], priznak[9] = detectEugene.eyebrows_bold(pose_landmarks, image1)
             print("Брови тёмные, густые:", priznak[9], "Брови светлые, редкие:", priznak[7])
-            
+            '''
             priznak[32], priznak[34], priznak[55] = detectEugene.forhead_form(pose_landmarks, image1, prop) #круг, М, квадрат
             print("Волосы лба Полукругом: ", priznak[32], " Буквой М: ", priznak[34], "Квадратный: ", priznak[55])
-
+            '''
             priznak[35], priznak[56] = detectEugene.forhead_height(pose_landmarks, image1, prop)
             print("Лоб Широкий: ", priznak[35], "Лоб Узкий: ", priznak[56])
 

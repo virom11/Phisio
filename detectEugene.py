@@ -128,14 +128,13 @@ def forhead_form(pose, image, scale):
 	forhead[0], forhead[1], forhead[2] = add_forehead(pose, image, scale)
 
 	if forhead[1].length == 0:
-		#return "Лоб слишком тёмный, либо неправильный угол", "", ""
 		return -1,-1,-1
 
 	distance = lined(forhead[1].x, forhead[1].y, forhead[0].x, forhead[0].y, forhead[2].x, forhead[2].y) * 100/scale
 
-	fh_M = clamp((distance + 17) * 2, 0, 100)
-	fh_circle = clamp(-((distance - 17) * 2), 0, 100)
-	fh_square = 100 - clamp(abs(distance) * 6, 0, 100)
+	fh_M = clamp((distance + 20) * 2, 0, 100)
+	fh_circle = clamp(-((distance - 20) * 2), 0, 100)
+	fh_square = 100 - clamp(abs(distance) * 8, 0, 100)
 
 	return fh_circle, fh_M, fh_square
 
