@@ -86,7 +86,7 @@ for error in errors:
 
 
 def analyzer(control_string,dir,file_num):
-    counter=1
+    counter=float(1)
     file_num+=1
     row=1
     sum=0
@@ -124,7 +124,7 @@ def analyzer(control_string,dir,file_num):
                 pose_landmarks=0
                 detected_faces=[]
                 file_name=dir+"/"+filename
-                print("File name is: " + str(file_name) + ". " + "Number of photo: " + str(counter))
+                print("File name is: " + str(file_name) + ". " + "Number of photo: " + str(int(counter)))
                 face_detector = dlib.get_frontal_face_detector()
                 image1 = Image.open(file_name) # Здесь откроет фото
                 image = io.imread(file_name) # Здесь фото, как массив
@@ -151,7 +151,11 @@ def analyzer(control_string,dir,file_num):
                     worksheet.write(row, 0, counter)
                     worksheet.write(row, 1, file_name.replace("/home/vector/Documents", ""))
                     worksheet.write(row, 2,  "Нет")
-                    main=0
+                    main=-2
+                    var_25 = -1
+                    var_26 = -1
+                    var_27 = -1
+                    print('Control_string: '+ str(control_string))
                     if(control_string == "Переносица с впадиной: "):
                         a, main = detectVector.nose(predictor_model, file_name,pose_landmarks)
                     elif(control_string == "Прямой нос: "):
@@ -184,13 +188,13 @@ def analyzer(control_string,dir,file_num):
                         main, a = detectEugene.forhead_height(pose_landmarks, image1, prop)
                     elif(control_string == "Духовный : "):
                         main, a, b  = detectEugene.worlds(pose_landmarks, image1, prop)
-                    elif(control_string == " Материальный: "):
+                    elif(control_string == "Материальный: "):
                         a, main, b = detectEugene.worlds(pose_landmarks, image1, prop)
-                    elif(control_string == " Семейный: "):
+                    elif(control_string == "Семейный: "):
                         a, b, main = detectEugene.worlds(pose_landmarks, image1, prop)
                     elif(control_string == "Волосы лба Полукругом: "):
                         main, a, b  = detectEugene.forhead_form(pose_landmarks, image1, prop)
-                    elif(control_string == " Буквой М: "):
+                    elif(control_string == "Буквой М: "):
                         a, main, b = detectEugene.forhead_form(pose_landmarks, image1, prop)
                     elif(control_string == "Квадратный: "):
                         a, b, main = detectEugene.forhead_form(pose_landmarks, image1, prop)
@@ -203,9 +207,9 @@ def analyzer(control_string,dir,file_num):
                     elif(control_string == "Скулы ниже уровня глаз: "):
                         a, b, main = detectEugene.cheekbones(pose_landmarks, image1, prop)
                     elif(control_string == "Брови тёмные, густые:"):
-                        main, a = detectEugene.eyebrows_bold(pose_landmarks, image1)
-                    elif(control_string == "Брови светлые, редкие: "):
                         a, main = detectEugene.eyebrows_bold(pose_landmarks, image1)
+                    elif(control_string == "Брови светлые, редкие:"):
+                        main, a = detectEugene.eyebrows_bold(pose_landmarks, image1)
                     elif(control_string == "Прижатые уши: "):
                         main, a = detectEugene.eyebrows_bold(pose_landmarks, image1)
                     elif(control_string == "Квадратная мочка уха: "):
@@ -257,7 +261,7 @@ def analyzer(control_string,dir,file_num):
                         if (d<0):
                             var_25=0
                             var_26 = d
-                            if d<20: priznak[27]=100-d*5
+                            if d<20: var_27=100-d*5
                         main = var_25
                     elif(control_string == "Уголки губ вниз: "):
                         left =detect.left_lips_ugolki(pose_landmarks, prop)
@@ -270,9 +274,9 @@ def analyzer(control_string,dir,file_num):
                         if (d<0):
                             var_25=0
                             var_26 = d
-                            if d<20: priznak[27]=100-d*5
+                            if d<20: var_27=100-d*5
                         main = var_26
-                    elif(control_string == "Уголки губ вниз: "):
+                    elif(control_string == "Уголки губ прямо: "):
                         left =detect.left_lips_ugolki(pose_landmarks, prop)
                         right = detect.right_lips_ugolki(pose_landmarks, prop)
                         d=(left+right)/2
@@ -283,14 +287,15 @@ def analyzer(control_string,dir,file_num):
                         if (d<0):
                             var_25=0
                             var_26 = d
-                            if d<20: priznak[27]=100-d*5
+                            if d<20: var_27=100-d*5
                         main = var_27
                     elif(control_string == "Сросшиеся брови: "):
                         main = detect.eyebrows_accreted(pose_landmarks, image1)
                         
                     worksheet.write(row, 3, control_string)
-                    if(main != "Error"):
-                        sum=sum+main
+                    if(main >=0 ):
+                        sum=sum+float(main)
+                        average=float(sum)/(counter)
                         digits.append(main)
                         if(max<main):
                             max=main
@@ -300,10 +305,14 @@ def analyzer(control_string,dir,file_num):
                             above+=1
                         if(main<50):
                             below+=1
-                        worksheet.write(row, 4,  str(main))
+                        worksheet.write(row, 4,  main)
                         counter+=1
                         row+=1
-                    #print(counter)
+                    elif(main == -1):
+                        print('Error! Incorrect photo. CODE_ERROR = -1')
+                    elif(main == -2):
+                        print('Error! Incorrect control string. CODE_ERROR = -2')
+
         else:
             break
 
@@ -329,8 +338,6 @@ def analyzer(control_string,dir,file_num):
             counter+=1
             row+=1
     
-            
-    average=sum/counter
     worksheet.write(row, 0,  "Среднее значение")
     worksheet.write(row, 1,  average)
     row+=1
@@ -364,7 +371,7 @@ for i in features_list:
     minutes=int(time.time()-start_time)//60
     j+=1
     print('Number of folder: ' + str(j))
-    print("Time passed: " + str(hours) + ":" + str(minutes) + ":" + str(int((time.time()-start_time))%60))
+    print("Time passed: " + str(hours%60) + ":" + str(minutes%60) + ":" + str(int((time.time()-start_time))%60))
     control_string=i
     dir=base+features_list[i]
     file_num=analyzer(control_string,dir,file_num)
