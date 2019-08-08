@@ -34,6 +34,7 @@ average2 = 0
 average3 = 0
 count_ = 0
 
+
 max = 0
 min = 100
 
@@ -43,12 +44,12 @@ if(ubuntu):
 
 	predictor_model = "/home/vector/Documents/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
 	#dir="/home/vector/Documents/Лоб/Прямой лоб"
-	dir="/home/vector/Documents/Веки/Закрытые посередине"
+	dir="/home/vector/Documents/Брови/Домиком"
 
 else:
 
 	predictor_model = "C:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
-	dir="C:/Dropbox/Студенты/Глаза/Голубые"
+	dir="C:/Dropbox/Студенты/Брови/Домиком"
 
 
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
@@ -151,13 +152,13 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             priznak[12] = 100-priznak[20]
             print("Близко-посаженные глаза: ", priznak[12])
             print("Широко-посаженные глаза: ", priznak[20])
-            '''
+            
             priznak[16],priznak[17],priznak[18],priznak[19]=detectEugene.eye_color(pose_landmarks, image1)
             print("Голубые глаза: ", priznak[16])
             print("Зеленые глаза: ", priznak[17])
             print("Карие и черные глаза: ", priznak[18])
             print("Серые глаза: ", priznak[19])
-            '''
+            
             priznak[40] =detect.chin_size(pose_landmarks, prop)
             priznak[43] = 100 - priznak[40]
             print("Большой подбородок: ", priznak[40])
@@ -171,10 +172,10 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             print("Сросшиеся брови: ", priznak[8])
             if priznak[8]>max: max=priznak[8]
             if priznak[8] < min: min = priznak[8]
-
+            '''
             priznak[3], priznak[4], priznak[5] = detectEugene.eyebrows(pose_landmarks, prop)
             print("Бровин Домиком: ", priznak[3], "Бровин Полукругом: ", priznak[4], "Бровин Линией: ", priznak[5])
-
+            '''
             priznak[44] = detectEugene.fat_chin(pose_landmarks, image1)
             print("Раздвоенный подбородок: ", priznak[44])
             
@@ -236,10 +237,6 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
 
             count_ += 1
             print(count_)
-
-
-print("Максимум: ", max)
-print("Минимум: ", min)
 
 
 

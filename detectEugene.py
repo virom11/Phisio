@@ -15,11 +15,12 @@ from scriptsEugene import *
 def eyebrows(pose, scale):
 	scale = 100 / scale
 
-	dir1 = dir_between(pose.part(17).x, pose.part(17).y, pose.part(18).x, pose.part(18).y,
-											pose.part(21).x, pose.part(21).y, pose.part(19).x, pose.part(19).y)
+	dir1 = dir_between(pose.part(31).x, pose.part(31).y, pose.part(35).x, pose.part(35).y,
+													pose.part(22).x, pose.part(22).y, pose.part(26).x, pose.part(26).y)
 
-	dir2 = dir_between(pose.part(25).x, pose.part(25).y, pose.part(26).x, pose.part(26).y,
-											pose.part(22).x, pose.part(22).y, pose.part(24).x, pose.part(24).y)
+
+	dir2 = dir_between(pose.part(35).x, pose.part(35).y, pose.part(31).x, pose.part(31).y,
+													pose.part(21).x, pose.part(21).y, pose.part(17).x, pose.part(17).y)
 
 
 	eye_line1 = dir_between(pose.part(22).x, pose.part(22).y, pose.part(23).x, pose.part(23).y,
@@ -29,11 +30,11 @@ def eyebrows(pose, scale):
 													pose.part(21).x, pose.part(21).y, pose.part(17).x, pose.part(17).y)
 	
 
-	eye_house = (dir1 + dir2) / 2 * (0.5 + (dir1 + dir2) / 2 * 0.01)
-
 	eye_circle = ((eye_line1 + eye_line2) / 2 - 12) * 3.44
 
-	eye_line = 100 - eye_circle
+	eye_house = mean_square((dir1 + dir2) / 2 * 10, 100 - eye_circle)
+
+	eye_line = mean_square(100 - (dir1 + dir2) / 2 * 10, 100 - eye_circle)
 
 
 	eye_house, eye_circle, eye_line = clamp(eye_house, 0, 100), clamp(eye_circle, 0, 100), clamp(eye_line, 0, 100)
