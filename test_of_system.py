@@ -117,7 +117,7 @@ def analyzer(control_string,dir,file_num):
             if some_str in err:
                 global_flag=1
             
-        if(counter<10000):
+        if(counter<10):
 
             if (filename.endswith("_hog.jpg")==0) and (filename.endswith("_detect.jpg")==0) and (filename.endswith("_aligned.jpg")==0) and (global_flag==0):  # Работаем только с оригиналом фото, не hog и не распознанное
                 prop=0
@@ -291,6 +291,12 @@ def analyzer(control_string,dir,file_num):
                         main = var_27
                     elif(control_string == "Сросшиеся брови: "):
                         main = detect.eyebrows_accreted(pose_landmarks, image1)
+                    elif(control_string == "Веки закрытые внутри: "):
+                        main,a,b = detectVector.eyelids(predictor_model, file_name,pose_landmarks)
+                    elif(control_string == "Веки закрытые посередине: "):
+                        a,main,b = detectVector.eyelids(predictor_model, file_name,pose_landmarks)
+                    elif(control_string == "Веки закрытые снаружи: "):
+                        a,b,main = detectVector.eyelids(predictor_model, file_name,pose_landmarks)
                         
                     worksheet.write(row, 3, control_string)
                     if(main >=0 ):
