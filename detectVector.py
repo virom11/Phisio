@@ -302,7 +302,7 @@ def eyelids(predictor_model,file_name,pose_landmarks):
             y_data.append(y)
             average_s_data.append(average_s)
             #print(str(average_f))
-            #pix[pose_landmarks.part(a+counter).x,y] = (255,255,255)
+            pix[pose_landmarks.part(a+counter).x,y] = (255,255,255)
             y-=1
         # Creates just a figure and only one subplot
         fig, ax = plt.subplots()
@@ -310,7 +310,7 @@ def eyelids(predictor_model,file_name,pose_landmarks):
         ax.set_title('Plot of point: ' + str(a+counter))
         fig.savefig(file_name.replace(".jpg",str(a+counter)+"_.jpg"))
         counter+=3
-    #im.save(file_name)
+    im.save(file_name)
     
     plt.show()
 
