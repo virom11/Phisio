@@ -23,8 +23,8 @@ def dir_between(x1, y1, x2, y2, x3, y3, x4, y4):
 	return math.degrees(math.atan(abs((k1 - k2) / (k1 * k2 + a))))
 
 
-def mean_square(a, b, c = -1):
-	if c == -1:
+def mean_square(a, b, c = -404):
+	if c == -404:
 		return math.sqrt((a**2 + b**2) / 2)
 	else:
 		return math.sqrt((a**2 + b**2 + c**2) / 3)

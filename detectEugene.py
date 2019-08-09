@@ -181,17 +181,21 @@ def face_form(pose, image, scale):
 	dist4 = distance(pose.part(5).x, pose.part(5).y, forhead[1].x, forhead[1].y)
 
 	dist1, dist2, dist3, dist4 = dist1 * 100/scale, dist2 * 100/scale, dist3 * 100/scale, dist4 * 100/scale
+	
+	water = mean_square(((dist1 + dist2 + dist3)/3 - 140) * 2.8, ((dist2 + dist3) / 2 - 120) * 1.5)
 
-	water = ((dist1 + dist2 + dist3)/3 - 130) * 2
+	wind = mean_square(100 - abs(dist2 - 173.4) * 5, (dist4 - dist2 - 10) * 2.4)
 
-	wind = 100 - abs(dist3 - dist1) * 6
+	fire = mean_square(100 - (dist3 - 130) * 2.6, (dist1 - dist3 + 10) * 3.7, 100 - (dist1 + dist2 + dist3 + dist4) / 4 / 3.4)
 
-	fire = mean_square(100 - (dist1 - 130) * 2.5, (dist1 - dist3 + 30) * 1.67)
+	max_ = max(water, wind, fire)
+	if max_ > 100:
+		k = max_ / 100
+		water, wind, fire = water / k, wind / k, fire / k
 
-	if forhead[1].length != 0:
-		water *= dist2 / dist4
-		wind *= dist4 / dist2
-		fire *= (50 - abs(dist2 - dist4) * 5) / 100 + 1
+		
+	if forhead[1].length == 0:
+		return -1, -1, -1
 
 	return clamp(water, 0, 100), clamp(wind, 0, 100), clamp(fire, 0, 100)
 
