@@ -117,7 +117,7 @@ def analyzer(control_string,dir,file_num):
             if some_str in err:
                 global_flag=1
             
-        if(counter<10):
+        if(counter<10000):
 
             if (filename.endswith("_hog.jpg")==0) and (filename.endswith("_detect.jpg")==0) and (filename.endswith("_aligned.jpg")==0) and (global_flag==0):  # Работаем только с оригиналом фото, не hog и не распознанное
                 prop=0
@@ -155,7 +155,7 @@ def analyzer(control_string,dir,file_num):
                     var_25 = -1
                     var_26 = -1
                     var_27 = -1
-                    print('Control_string: '+ str(control_string))
+                    #print('Control_string: '+ str(control_string))
                     if(control_string == "Переносица с впадиной: "):
                         a, main = detectVector.nose(predictor_model, file_name,pose_landmarks)
                     elif(control_string == "Прямой нос: "):

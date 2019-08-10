@@ -6,7 +6,7 @@ import sys
 import dlib
 import detect
 import detectEugene
-#import detectVector
+import detectVector
 import os
 #import openface
 import imageio
@@ -45,7 +45,7 @@ if(ubuntu):
 
 	predictor_model = "/home/vector/Documents/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
 	#dir="/home/vector/Documents/Лоб/Прямой лоб"
-	dir="/home/vector/Documents/Форма лица/Вода"
+	dir="/home/vector/Documents/Проект/Нос/Переносица с впадиной"
 
 else:
 
@@ -194,10 +194,10 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
 
             priznak[10], priznak[11] = detectEugene.eyebrows_height(pose_landmarks, image1, prop)
             print("Тонкие брови: ", priznak[10], " Широкие брови: ", priznak[11])
-            '''
+            
             priznak[51], priznak[52], priznak[53]= detectEugene.face_form(pose_landmarks, image1, prop)
             print("Вода на: ", priznak[51]," Ветер на: ", priznak[52]," Огонь на: ", priznak[53])
-            '''  
+              
             priznak[57], priznak[58], priznak[59] = detectEugene.worlds(pose_landmarks, image1, prop)
             print("Духовный: ", priznak[57]," Материальный: ", priznak[58]," Семейный: ", priznak[59])
             
@@ -235,6 +235,9 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             #priznak[15],priznak[13], priznak[14] = detectVector.eyelids(predictor_model, file_name,pose_landmarks)
             #print("Веки, закрытые внутри : ", priznak[15],"Веки, закрытые посередине  : ", priznak[13],"Веки, закрытые снаружи  : ", priznak[14])
             #ВЕКАМ ТРЕБУЮТСЯ ФИКСЫ
+
+            light, dark, orange = detectVector.hair_color(predictor_model,file_name,pose_landmarks)
+            print("Светлые волосы: ", light, "Темные волосы: ", dark, "Рыжые волосы: ", orange)
 
             #average1, average2, average3, average4 = average1 + priznak[51], average2 + priznak[52], average3 + priznak[53], average4 + priznak[54]
             count_ += 1
