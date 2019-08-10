@@ -317,3 +317,39 @@ def eye_color(pose, im):
 	gol, zel, kar, ser = clamp(gol, 0, 100), clamp(zel, 0, 100), clamp(kar, 0, 100), clamp(ser, 0, 100)
 
 	return gol, zel, kar, ser
+
+
+def fat_chin2(predictor_model,file_name,pose):
+
+	im = Image.open(file_name) # Can be many different formats.
+	pix = im.load()
+	#print('Image Size: '+str(im.size))  # Get the width and hight of the image for iterating over
+	x1 = pose.part(7).x
+	x2 = pose.part(9).x
+	y1 = pose.part(7).y
+	y2 = pose.part(9).y
+	x = round(x1)
+	yn = (pose.part(8).x-pose.part(7).x) / 4
+	y = y1 - yn #= round((((y2 - y1)*(x - x1)) + yn * (x2 - x1))/(x2 - x1))
+
+	max=0
+	min=255
+
+	while((x<x2) and (x>0)):
+		second_color=pix[x,y]
+		#print('x: '+str(x))
+		#print('y: '+str(y)) 
+		average_s=(0.299 *	second_color[0] + 0.587 * second_color[1]+ 0.114 * second_color[2])
+		#print('average_s: '+str(average_s))
+		if(average_s<min):
+			min=average_s
+		if(average_s>max):
+			max=average_s
+		#pix[x,y] = (255,255,255)
+		x+=1
+	if((max-min)>80):
+		result = 100
+	else:
+		result = 0
+
+	return result
