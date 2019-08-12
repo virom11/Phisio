@@ -278,17 +278,18 @@ def eyelids(predictor_model,file_name,pose_landmarks):
     #round(((y-y1)*(x2-x1)+x1*(y2-y1))/(y2-y1))
     if(distance_1>distance_2):
         a=36
-        b=37
     else:
         a=42
-        b=44
-    print('a: '+str(a))
+
     counter=0
-
-
+    flag=[]
     while(counter<4):
         limit_y1=round(pose_landmarks.part(a+counter).y)
-        limit_y2=round((pose_landmarks.part(18).y-pose_landmarks.part(37).y)/2+pose_landmarks.part(37).y)
+        if(a==36):
+            limit_y2=round((pose_landmarks.part(a+counter).y)-(pose_landmarks.part(41).y-pose_landmarks.part(37).y))
+        else:
+            limit_y2=round((pose_landmarks.part(a+counter).y)-(pose_landmarks.part(46).y-pose_landmarks.part(44).y))
+        
         x1=pose_landmarks.part(27).x
         x2=pose_landmarks.part(33).x
         y1=pose_landmarks.part(27).y
@@ -302,35 +303,92 @@ def eyelids(predictor_model,file_name,pose_landmarks):
             y_data.append(y)
             average_s_data.append(average_s)
             #print(str(average_f))
-            pix[pose_landmarks.part(a+counter).x,y] = (255,255,255)
+            #pix[pose_landmarks.part(a+counter).x,y] = (255,255,255)
             y-=1
         # Creates just a figure and only one subplot
-        fig, ax = plt.subplots()
-        ax.plot(y_data, average_s_data)
-        ax.set_title('Plot of point: ' + str(a+counter))
-        fig.savefig(file_name.replace(".jpg",str(a+counter)+"_.jpg"))
-        counter+=3
-    im.save(file_name)
+        #fig, ax = plt.subplots()
+        #ax.plot(y_data, average_s_data)
+        #ax.set_title('Plot of point: ' + str(a+counter))
+        #fig.savefig(file_name.replace(".jpg",str(a+counter)+"_.jpg"))
+        
+        test_data = average_s_data[0]
+        diff=[]
+        for data in average_s_data:
+            if(test_data>data)and((test_data-data)>6):
+                diff.append(1)
+                test_data=data
+            else:
+                diff.append(0)
+                test_data=data
+
+        #fig, ax = plt.subplots()
+        #ax.plot(y_data, diff)
+        #ax.set_title('Plot of diff of point: ' + str(a+counter))
+        #fig.savefig(file_name.replace(".jpg",str(a+counter)+"_diff.jpg"))
+        
+        if 1 in diff:
+            flag.append(1)
+        else:
+            flag.append(0)
+        counter+=1
+
+    if (flag[0]==1 and flag[1]==1 and flag[2]==1 and flag[3]==1):
+        center=100
+    elif(flag[0]==0 and flag[1]==1 and flag[2]==1 and flag[3]==1):
+        center=200/3
+    elif(flag[0]==0 and flag[1]==0 and flag[2]==1 and flag[3]==1):
+        center=100/3
+    elif(flag[0]==0 and flag[1]==0 and flag[2]==0 and flag[3]==1):
+        center=0
+    else:
+        outside = 100
     
-    plt.show()
-
-
-    """
-fig, ax = plt.subplots()
-
-line1, = ax.plot(x,y, label="Line 1", linewidth=2)
-line2, = ax.plot([3, 2, 1], label="Line 2", linewidth=1)
-
-# Create a legend for the first line.
-first_legend = ax.legend(handles=[line1], loc='upper right')
-
-# Add the legend manually to the current Axes.
-ax.add_artist(first_legend)
-
-# Create another legend for the second line.
-ax.legend(handles=[line2], loc='lower right')
-
-plt.show()
-    """
-
+    inside=100-center
+    #im.save(file_name)
+    
+    #plt.show()
     return inside, center, outside
+
+
+def hair_color(predictor_model,file_name,pose_landmarks):
+    light=0
+    dark=0 
+    orange=0
+    im = Image.open(file_name) # Can be many different formats.
+    pix = im.load()
+    #print('Image Size: '+str(im.size))  # Get the width and hight of the image for iterating over
+    limit_y1=round(pose_landmarks.part(27).y)
+    limit_y2=round(2*pose_landmarks.part(27).y-pose_landmarks.part(28).y)
+    x1=pose_landmarks.part(27).x
+    x2=pose_landmarks.part(33).x
+    y1=pose_landmarks.part(27).y
+    y2=pose_landmarks.part(33).y
+    y=round(pose_landmarks.part(27).y)
+    first_color=pix[round(((y-y1)*(x2-x1)+x1*(y2-y1))/(y2-y1)),y]
+    #print('first_color: '+str(first_color))
+    average_f=(first_color[0]+first_color[1]+first_color[2])/3
+    #print('average_f: '+str(average_f)) 
+    y_data=[]
+    average_data=[]
+    counter=0
+    
+    while(y>0):
+        counter+=1
+        pix_x=round(((y-y1)*(x2-x1)+x1*(y2-y1))/(y2-y1))
+        second_color=pix[pix_x,y]
+        average_s=(second_color[0]+second_color[1]+second_color[2])/3
+        y_data.append(y)
+        average_data.append(average_s)
+        # Get the RGBA Value of the a pixel of an image
+        #pix[pix_x,y] = (255,255,255)  # Set the RGBA Value of the image (tuple)
+        y-=1
+    #im.save(file_name)
+    
+    fig, ax = plt.subplots()
+    ax.plot(y_data, average_data)
+    #ax.set_title('Plot of point: ' + str(a+counter))
+    fig.savefig(file_name.replace(".jpg","_.jpg"))
+
+
+    return light, dark, orange
+

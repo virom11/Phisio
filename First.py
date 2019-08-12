@@ -48,7 +48,7 @@ if(ubuntu):
 
 	predictor_model = "/home/vector/Documents/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
 	#dir="/home/vector/Documents/Лоб/Прямой лоб"
-	dir="/home/vector/Documents/Форма лица/Вода"
+	dir="/home/vector/Documents/Проект/Нос/Переносица с впадиной"
 
 else:
 
@@ -201,7 +201,7 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             
             priznak[51], priznak[52], priznak[53]= detectEugene.face_form(pose_landmarks, image1, prop)
             print("Вода на: ", priznak[51]," Ветер на: ", priznak[52]," Огонь на: ", priznak[53])
-             
+
             priznak[57], priznak[58], priznak[59] = detectEugene.worlds(pose_landmarks, image1, prop)
             print("Духовный: ", priznak[57]," Материальный: ", priznak[58]," Семейный: ", priznak[59])
             
@@ -241,9 +241,14 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             #ВЕКАМ ТРЕБУЮТСЯ ФИКСЫ
 
             average1, average2, average3 = average1 + priznak[51], average2 + priznak[52], average3 + priznak[53]
+
+            light, dark, orange = detectVector.hair_color(predictor_model,file_name,pose_landmarks)
+            print("Светлые волосы: ", light, "Темные волосы: ", dark, "Рыжые волосы: ", orange)
+
+            
             count_ += 1
             print(count_)
-            if count_ == 40: break
+            if count_ == 50: break
 
 average1, average2, average3 = average1 / count_, average2 / count_, average3 / count_
 print(average1, average2, average3)
