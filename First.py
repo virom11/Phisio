@@ -33,6 +33,9 @@ average1 = 0
 average2 = 0
 average3 = 0
 average4 = 0
+average5 = 0
+average6 = 0
+average7 = 0
 count_ = 0
 
 
@@ -50,7 +53,7 @@ if(ubuntu):
 else:
 
 	predictor_model = "C:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
-	dir="C:/Dropbox/Студенты/Подбородок/Раздвоенный с вмятиной"
+	dir="C:/Dropbox/Студенты/Лоб/Волосы буквой М"
 
 
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
@@ -176,19 +179,20 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             
             priznak[3], priznak[4], priznak[5] = detectEugene.eyebrows(pose_landmarks, prop)
             print("Бровин Домиком: ", priznak[3], "Бровин Полукругом: ", priznak[4], "Бровин Линией: ", priznak[5])
-            '''
+            
             priznak[44] = detectEugene.fat_chin2(predictor_model,file_name,pose_landmarks)
             print("Раздвоенный подбородок: ", priznak[44])
-            '''
+            
             priznak[6] = detectEugene.eyebrows_rise(pose_landmarks, prop)
             print("Бровь с подъёмом: ", priznak[6])
             
             priznak[7], priznak[9] = detectEugene.eyebrows_bold(pose_landmarks, image1)
             print("Брови тёмные, густые:", priznak[9], "Брови светлые, редкие:", priznak[7])
-            
-            priznak[32], priznak[34], priznak[55] = detectEugene.forhead_form(pose_landmarks, image1, prop) #круг, М, квадрат
+            '''
+            #priznak[32], priznak[34], priznak[55] = detectEugene.forhead_form(pose_landmarks, image1, prop) #круг, М, квадрат
+            priznak[32], priznak[34], priznak[55] = detectEugene.forhead_form(pose_landmarks, image1, prop, image)
             print("Волосы лба Полукругом: ", priznak[32], " Буквой М: ", priznak[34], "Квадратный: ", priznak[55])
-            
+            '''
             priznak[35], priznak[56] = detectEugene.forhead_height(pose_landmarks, image1, prop)
             print("Лоб Широкий: ", priznak[35], "Лоб Узкий: ", priznak[56])
 
@@ -236,13 +240,13 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             #print("Веки, закрытые внутри : ", priznak[15],"Веки, закрытые посередине  : ", priznak[13],"Веки, закрытые снаружи  : ", priznak[14])
             #ВЕКАМ ТРЕБУЮТСЯ ФИКСЫ
 
-            #average1, average2, average3, average4 = average1 + priznak[51], average2 + priznak[52], average3 + priznak[53], average4 + priznak[54]
+            average1, average2, average3 = average1 + priznak[51], average2 + priznak[52], average3 + priznak[53]
             count_ += 1
             print(count_)
-            if count_ == 50: break
+            if count_ == 40: break
 
-average1, average2, average3, average4 = average1 / count_, average2 / count_, average3 / count_, average4 / count_
-print(average1, average2, average3, average4)
+average1, average2, average3 = average1 / count_, average2 / count_, average3 / count_
+print(average1, average2, average3)
 
 # Wait until the user hits <enter> to close the window
 # dlib.hit_enter_to_continue()

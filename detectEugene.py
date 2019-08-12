@@ -8,6 +8,9 @@ from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
 
+import dlib
+import time
+
 from scriptsEugene import *
 
 
@@ -122,21 +125,35 @@ def eyebrows_bold(pose, image):
 
 
 # Форма волос лба
-def forhead_form(pose, image, scale):
+def forhead_form(pose, image, scale, im):
 	
 	forhead = [0, 0, 0]
-	forhead[0], forhead[1], forhead[2] = add_forehead(pose, image, scale)
+	forhead[0], forhead[1], forhead[2] = add_forehead(pose, image, scale, 1)
 
 	if forhead[1].length == 0:
 		return -1,-1,-1
 
-	distance = lined(forhead[1].x, forhead[1].y, forhead[0].x, forhead[0].y, forhead[2].x, forhead[2].y) * 100/scale
+	#distance = lined(forhead[1].x, forhead[1].y, forhead[0].x, forhead[0].y, forhead[2].x, forhead[2].y) * 100/scale
 
-	fh_M = clamp((distance + 20) * 2, 0, 100)
-	fh_circle = clamp(-((distance - 20) * 2), 0, 100)
-	fh_square = 100 - clamp(abs(distance) * 8, 0, 100)
+	side_forehead = (forhead[0].length + forhead[2].length) / 2
+	min_forehead = min(forhead[0].length, forhead[2].length)
+	max_forehead = max(forhead[0].length, forhead[2].length)
+
+	fh_M = clamp((max_forehead - forhead[1].length) * 20, 0, 100)
+	fh_circle = clamp((forhead[1].length - min_forehead) * 12, 0, 100)
+	fh_square = 100 - clamp(abs(forhead[1].length - side_forehead) * 20, 0, 100)
+
+
+	win = dlib.image_window()
+	im[round(forhead[0].y),round(forhead[0].x)]=[255,0,0]
+	im[round(forhead[1].y),round(forhead[1].x)]=[255,0,0]
+	im[round(forhead[2].y),round(forhead[2].x)]=[255,0,0]
+
+	win.set_image(im)
+	time.sleep(15)
 
 	return fh_circle, fh_M, fh_square
+
 
 
 # Высота лба
@@ -339,7 +356,10 @@ def fat_chin2(predictor_model,file_name,pose):
 		second_color=pix[x,y]
 		#print('x: '+str(x))
 		#print('y: '+str(y)) 
-		average_s=(0.299 *	second_color[0] + 0.587 * second_color[1]+ 0.114 * second_color[2])
+		try:
+			average_s=(0.299 *	second_color[0] + 0.587 * second_color[1]+ 0.114 * second_color[2])
+		except:
+			return 0
 		#print('average_s: '+str(average_s))
 		if(average_s<min):
 			min=average_s
@@ -353,3 +373,4 @@ def fat_chin2(predictor_model,file_name,pose):
 		result = 0
 
 	return result
+

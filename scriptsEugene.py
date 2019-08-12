@@ -165,48 +165,50 @@ class Forehead(object):
 			summ = 0
 			average = 0
 
-			x = pose.part(pose_number).x +  length * lendir_x
-			y = pose.part(pose_number).y +  length * lendir_y
+			if pose_number == 1:
+				x = (pose.part(19).x + pose.part(24).x) / 2 +  length * lendir_x
+				y = (pose.part(19).y + pose.part(24).y) / 2 +  length * lendir_y
+			else:
+				x = pose.part(pose_number).x +  length * lendir_x
+				y = pose.part(pose_number).y +  length * lendir_y
+
 			try:
 				r, g, b = image.getpixel((x, y))
 				color2_rgb = sRGBColor(r / 255, g / 255, b / 255);
 			except:
-				print('error')
+				x = 0
+				y = 0
+				length = 0
+			else:
+				while (length!=0):
+					r, g, b = get_color(round(x)-2, round(x)+2, round(y)-2, round(y)+2, image, 3)
+					
+					color1_rgb = sRGBColor(r / 255, g / 255, b / 255);
 
-			while (length!=0):
-				try:
-					r, g, b = image.getpixel((x, y))
-				except:
-					x = 0
-					y = 0
-					length = 0
-					break
-				color1_rgb = sRGBColor(r / 255, g / 255, b / 255);
+					# Convert from RGB to Lab Color Space
+					color1_lab = convert_color(color1_rgb, LabColor);
 
-				# Convert from RGB to Lab Color Space
-				color1_lab = convert_color(color1_rgb, LabColor);
+					# Convert from RGB to Lab Color Space
+					color2_lab = convert_color(color2_rgb, LabColor);
 
-				# Convert from RGB to Lab Color Space
-				color2_lab = convert_color(color2_rgb, LabColor);
+					# Find the color difference
+					delta_e = delta_e_cie2000(color1_lab, color2_lab);
 
-				# Find the color difference
-				delta_e = delta_e_cie2000(color1_lab, color2_lab);
+					#if pose_number == 27:
+					#	print("The difference between the 2 color = ", delta_e)
 
-				#if pose_number == 27:
-				#	print("The difference between the 2 color = ", delta_e)
+					if length > 18:
+						if (delta_e > average * 5 + 1.5) or (delta_e > 7):
+							break
 
-				if length > 18:
-					if (delta_e > average * 4 + 3) or (delta_e > 7):
-						break
+					summ += delta_e
+					length += 1
+					average = summ / length
 
-				summ += delta_e
-				length += 1
-				average = summ / length
+					color2_rgb = color1_rgb
 
-				color2_rgb = color1_rgb
-
-				x += lendir_x
-				y += lendir_y
+					x += lendir_x
+					y += lendir_y
 
 
 			self.x = x
@@ -215,13 +217,15 @@ class Forehead(object):
 
 
 
+
 # Добавляем 3 ебаных блять точки, ведь нейросеть не может блеат
-def add_forehead(pose, image, scale):
-	forh_center = Forehead(pose, image, scale, 27)
+def add_forehead(pose, image, scale, center_pose = 27):
+	forh_center = Forehead(pose, image, scale, center_pose)
 	forh_0 = Forehead(pose, image, scale, 19)
 	forh_2 = Forehead(pose, image, scale, 24)
 
 	return forh_0, forh_center, forh_2
+
 
 
 # Скрипт для длины бровей
@@ -405,3 +409,4 @@ def ear_height(pose, image, scale, x, y):
 		length = 0
 
 	return length
+
