@@ -157,18 +157,26 @@ def forhead_form(pose, image, scale, im):
 
 
 # Высота лба
-def forhead_height(pose, image, scale):
+def forhead_height(pose, image, scale, im):
 	forhead = [0, 0, 0]
-	forhead[0], forhead[1], forhead[2] = add_forehead(pose, image, scale)
+	forhead[0], forhead[1], forhead[2] = add_forehead(pose, image, scale, 1)
 
 	if forhead[1].length == 0:
 		return -1, -1
 
 	height = forhead[1].length
-	wide = clamp((height - 24) * 2.5, 0, 100)
+	wide = clamp((height - 14) * 3, 0, 100)
 	narrow = 100 - wide
 
-	return wide, narrow
+	#win = dlib.image_window()
+	#im[round(forhead[0].y),round(forhead[0].x)]=[255,0,0]
+	#im[round(forhead[1].y),round(forhead[1].x)]=[255,0,0]
+	#im[round(forhead[2].y),round(forhead[2].x)]=[255,0,0]
+
+	#win.set_image(im)
+	#time.sleep(7)
+
+	return forhead[1].length, narrow
 
 
 # Размер бровей

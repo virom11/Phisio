@@ -156,12 +156,12 @@ class Forehead(object):
 		length = 0
 
     # The class "constructor" - It actually an initializer 
-		def __init__(self, pose, image, scale, pose_number, length = 15):
+		def __init__(self, pose, image, scale, pose_number, length_main = 15):
 
 			dir_ = point_direction(pose.part(29).x, pose.part(29).y, pose.part(27).x, pose.part(27).y)
 			lendir_x, lendir_y = lengthDir(scale/50, dir_)
 
-			length = length
+			length = length_main
 			summ = 0
 			average = 0
 
@@ -169,8 +169,11 @@ class Forehead(object):
 			mul_scale = 3
 
 			if pose_number == 1:
+				length_main = 9
+				length = length_main
 				x = (pose.part(19).x + pose.part(24).x) / 2 +  length * lendir_x
 				y = (pose.part(19).y + pose.part(24).y) / 2 +  length * lendir_y
+
 			else:
 				x = pose.part(pose_number).x +  length * lendir_x
 				y = pose.part(pose_number).y +  length * lendir_y
@@ -183,9 +186,9 @@ class Forehead(object):
 				y = 0
 				length = 0
 			else:
-				while (length!=0):
-					r, g, b = get_color(round(x) - sub_scale, round(x) + sub_scale, round(y) - sub_scale, round(y) + sub_scale, image, 3)
-					
+				while (length!=0) and (y > 1 + sub_scale):
+					r, g, b = get_dominate_color(round(x) - sub_scale, round(x) + sub_scale, round(y) - sub_scale, round(y) + sub_scale, image, 3)
+
 					color1_rgb = sRGBColor(r / 255, g / 255, b / 255);
 
 					# Convert from RGB to Lab Color Space
@@ -200,7 +203,7 @@ class Forehead(object):
 					#if pose_number == 27:
 					#	print("The difference between the 2 color = ", delta_e)
 
-					if length > 18:
+					if length > length_main + 3:
 						if (delta_e > average * 3 + 1) or (delta_e > 7):
 							break
 
