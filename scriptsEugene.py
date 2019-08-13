@@ -165,7 +165,7 @@ class Forehead(object):
 			summ = 0
 			average = 0
 
-			sub_scale = 1
+			sub_scale = 5
 			mul_scale = 3
 
 			if pose_number == 1:

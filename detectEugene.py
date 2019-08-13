@@ -324,7 +324,10 @@ def eye_color(pose, im):
 
 	kar = 50 + (rs-bs)+(rs-gs)
 
-	ser = 100 - (abs(gs-rs)+abs(bs-rs)) * 1.67
+	ser = 100 - (abs(rs - gs)+abs(rs - bs)+abs(gs - bs)) * 1.5
+
+	blck = 100 - (abs(rs - gs)+abs(rs - bs)+abs(gs - bs)) * 2.5 - (rs - 70 + bs - 70 + gs - 70)
+	kar = max(blck, kar)
 
 	max_ = max(gol, zel, kar, ser)
 	if max_ > 100:
