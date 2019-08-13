@@ -165,6 +165,9 @@ class Forehead(object):
 			summ = 0
 			average = 0
 
+			sub_scale = 1
+			mul_scale = 3
+
 			if pose_number == 1:
 				x = (pose.part(19).x + pose.part(24).x) / 2 +  length * lendir_x
 				y = (pose.part(19).y + pose.part(24).y) / 2 +  length * lendir_y
@@ -181,7 +184,7 @@ class Forehead(object):
 				length = 0
 			else:
 				while (length!=0):
-					r, g, b = get_color(round(x)-2, round(x)+2, round(y)-2, round(y)+2, image, 3)
+					r, g, b = get_color(round(x) - sub_scale, round(x) + sub_scale, round(y) - sub_scale, round(y) + sub_scale, image, 3)
 					
 					color1_rgb = sRGBColor(r / 255, g / 255, b / 255);
 
@@ -198,7 +201,7 @@ class Forehead(object):
 					#	print("The difference between the 2 color = ", delta_e)
 
 					if length > 18:
-						if (delta_e > average * 5 + 1.5) or (delta_e > 7):
+						if (delta_e > average * 3 + 1) or (delta_e > 7):
 							break
 
 					summ += delta_e

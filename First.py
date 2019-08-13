@@ -53,7 +53,7 @@ if(ubuntu):
 else:
 
 	predictor_model = "C:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
-	dir="C:/Dropbox/Студенты/Лоб/Волосы буквой М"
+	dir="C:/Dropbox/Студенты/Лоб/Квадратный рост волос"
 
 
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
@@ -242,8 +242,8 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
 
             average1, average2, average3 = average1 + priznak[51], average2 + priznak[52], average3 + priznak[53]
 
-            light, dark, orange = detectVector.hair_color(predictor_model,file_name,pose_landmarks)
-            print("Светлые волосы: ", light, "Темные волосы: ", dark, "Рыжые волосы: ", orange)
+            #light, dark, orange = detectVector.hair_color(predictor_model,file_name,pose_landmarks)
+            #print("Светлые волосы: ", light, "Темные волосы: ", dark, "Рыжые волосы: ", orange)
 
             
             count_ += 1

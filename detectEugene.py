@@ -150,7 +150,7 @@ def forhead_form(pose, image, scale, im):
 	im[round(forhead[2].y),round(forhead[2].x)]=[255,0,0]
 
 	win.set_image(im)
-	time.sleep(15)
+	time.sleep(7)
 
 	return fh_circle, fh_M, fh_square
 
