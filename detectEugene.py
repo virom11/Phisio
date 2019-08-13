@@ -144,13 +144,13 @@ def forhead_form(pose, image, scale, im):
 	fh_square = 100 - clamp(abs(forhead[1].length - side_forehead) * 20, 0, 100)
 
 
-	win = dlib.image_window()
-	im[round(forhead[0].y),round(forhead[0].x)]=[255,0,0]
-	im[round(forhead[1].y),round(forhead[1].x)]=[255,0,0]
-	im[round(forhead[2].y),round(forhead[2].x)]=[255,0,0]
+	#win = dlib.image_window()
+	#im[round(forhead[0].y),round(forhead[0].x)]=[255,0,0]
+	#im[round(forhead[1].y),round(forhead[1].x)]=[255,0,0]
+	#im[round(forhead[2].y),round(forhead[2].x)]=[255,0,0]
 
-	win.set_image(im)
-	time.sleep(7)
+	#win.set_image(im)
+	#time.sleep(7)
 
 	return fh_circle, fh_M, fh_square
 
