@@ -39,7 +39,6 @@ def eyebrows(pose, scale):
 
 	eye_line = mean_square(100 - (dir1 + dir2) / 2 * 10, 100 - eye_circle)
 
-
 	eye_house, eye_circle, eye_line = clamp(eye_house, 0, 100), clamp(eye_circle, 0, 100), clamp(eye_line, 0, 100)
 
 	return eye_house, eye_circle, eye_line
@@ -347,7 +346,7 @@ def eye_color(pose, im):
 	return gol, zel, kar, ser
 
 
-def fat_chin2(predictor_model,file_name,pose):
+def fat_chin2(predictor_model, file_name, pose, im1):
 
 	im = Image.open(file_name) # Can be many different formats.
 	pix = im.load()
@@ -357,27 +356,63 @@ def fat_chin2(predictor_model,file_name,pose):
 	y1 = pose.part(7).y
 	y2 = pose.part(9).y
 	x = round(x1)
-	yn = (pose.part(8).x-pose.part(7).x) / 4
-	y = y1 - yn #= round((((y2 - y1)*(x - x1)) + yn * (x2 - x1))/(x2 - x1))
-
-	max=0
-	min=255
+	yn = y1 - (pose.part(8).x-pose.part(7).x) / 4
+	y = round((((y2 - y1)*(x - x1)) + yn * (x2 - x1))/(x2 - x1))
+	dist = (x2 - x1) / 2
+	average_s = 0
+	count = 0
 
 	while((x<x2) and (x>0)):
+		y = round((((y2 - y1)*(x - x1)) + yn * (x2 - x1))/(x2 - x1))
+
 		second_color=pix[x,y]
-		#print('x: '+str(x))
-		#print('y: '+str(y)) 
+
 		try:
-			average_s=(0.299 *	second_color[0] + 0.587 * second_color[1]+ 0.114 * second_color[2])
+			average_s += (0.299 *	second_color[0] + 0.587 * second_color[1]+ 0.114 * second_color[2]) #* (1 - abs((x - dist/2)/(dist/2)) + 0.5)
 		except:
-			return 0
-		#print('average_s: '+str(average_s))
+			return -1
+
+		
+
+		im1[y, x] = (255,255,255)
+		x += 1
+		count += 1
+
+	avrg = average_s / count
+	max=0
+	min=255
+	x1 = pose.part(7).x
+	x2 = pose.part(9).x
+	y1 = pose.part(7).y
+	y2 = pose.part(9).y
+	x = round(x1)
+
+	#win = dlib.image_window()
+
+	while((x<x2) and (x>0)):
+		y = round((((y2 - y1)*(x - x1)) + yn * (x2 - x1))/(x2 - x1))
+
+		second_color=pix[x,y]
+
+		average_s = (0.299 *	second_color[0] + 0.587 * second_color[1] + 0.114 * second_color[2]) 
+		average_s = (average_s - avrg)
+
+		if average_s > 0:
+			average_s = average_s * (2 - (abs(x - x1 - dist) / dist) * 2)
+
+		#print(average_s)
+
 		if(average_s<min):
 			min=average_s
 		if(average_s>max):
 			max=average_s
-		#pix[x,y] = (255,255,255)
+
+		#im1[y, x] = (255,255,255)
 		x+=1
+
+	#win.set_image(im1)
+	#time.sleep(7)
+
 	if((max-min)>80):
 		result = 100
 	else:
