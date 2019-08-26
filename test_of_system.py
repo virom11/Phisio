@@ -1,7 +1,24 @@
 #! /usr/bin/env python 
 # -*- coding: utf-8 -*-
 #Строки для корректной работы с киррилицей в python. Работают даже в закоментированном состоянии
+'''
+Как пользоваться тестировщиком
+Тестировщик состоит из двух файлов. Основной - test_of_system. В этом файле основной алгоритм программы. 
+Второй файл - features_list нужен для выбора черт лица, которые необходимо протестировать.
 
+Перед запуском программы в словаре features_list оставляем те черты, которые необходимо протестировать.
+Если нужно, чтобы программа прогоняла не все фото подборки можно изменить переменную play_counter на нужное количество раз. 
+Обращаю внимание, play_counter влияет не на общее количество фото, а на количество фото, где определение лица происходит без ошибки. 
+Обязательно настраиваем base="/home/vector/Documents/Проект/" - путь, по которому располагается подборка фото на компьютере. 
+Тестировщик, как и First чувствителен к системе. Так что base меняем:
+В Ubuntu на строке 50
+В Windows на строке 53
+В OSX на строке 55
+
+После окончания работы программы все отчеты сохраняются в Phisio/tests в формате xlsx. У каждой черты свой отчет. 
+Хотел сделать, чтобы все загонялось в один отчет, но, либо мои кривые руки, либо кривая библиотека не позволили это сделать
+
+'''
 import sys
 import dlib
 import os
@@ -25,8 +42,19 @@ for i in range(0, 66):
     priznak.append(0)  # Массив значений признаков
 
 file_num=0
+
 predictor_model = "/home/vector/Documents/shape_predictor_68_face_landmarks.dat"
-base="/home/vector/Documents/Проект/"
+
+
+#Автоматика для определения ситсемы, на которой запускается код
+if platform == "linux" or platform == "linux2":
+    base="/home/vector/Documents/Проект/"
+#elif platform == "darwin":
+    # base=""
+#elif platform == "win32" or platform == "win64":
+#    base=""
+
+play_counter=10000
 
 max = 0
 min = 100
@@ -117,9 +145,9 @@ def analyzer(control_string,dir,file_num):
             if some_str in err:
                 global_flag=1
             
-        if(counter<10000):
-
-            if (filename.endswith("_hog.jpg")==0) and (filename.endswith("_detect.jpg")==0) and (filename.endswith("_aligned.jpg")==0) and (global_flag==0):  # Работаем только с оригиналом фото, не hog и не распознанное
+        if(counter<play_counter):
+            
+            if (filename.endswith("_hog.jpg")==0) and (filename.endswith("_detect.jpg")==0) and (filename.endswith("_aligned.jpg")==0) and (filename.endswith("_line.jpg")==0) and (filename.endswith("_.jpg")==0) and (global_flag==0):  # Работаем только с оригиналом фото, не hog и не распознанное
                 prop=0
                 pose_landmarks=0
                 detected_faces=[]
@@ -181,7 +209,7 @@ def analyzer(control_string,dir,file_num):
                     elif(control_string == "Бровь с подъёмом: "):
                         main = detectEugene.eyebrows_rise(pose_landmarks, prop)
                     elif(control_string == "Раздвоенный подбородок: "):
-                        main = detectEugene.fat_chin(pose_landmarks, image1)
+                        main = detectEugene.fat_chin2(predictor_model,file_name,pose_landmarks)
                     elif(control_string == "Лоб Узкий: "):
                         a, main = detectEugene.forhead_height(pose_landmarks, image1, prop)
                     elif(control_string == "Лоб Широкий: "):
@@ -193,11 +221,11 @@ def analyzer(control_string,dir,file_num):
                     elif(control_string == "Семейный: "):
                         a, b, main = detectEugene.worlds(pose_landmarks, image1, prop)
                     elif(control_string == "Волосы лба Полукругом: "):
-                        main, a, b  = detectEugene.forhead_form(pose_landmarks, image1, prop)
+                        main, a, b  = detectEugene.forhead_form(pose_landmarks, image1, prop, image)
                     elif(control_string == "Буквой М: "):
-                        a, main, b = detectEugene.forhead_form(pose_landmarks, image1, prop)
+                        a, main, b = detectEugene.forhead_form(pose_landmarks, image1, prop, image)
                     elif(control_string == "Квадратный: "):
-                        a, b, main = detectEugene.forhead_form(pose_landmarks, image1, prop)
+                        a, b, main = detectEugene.forhead_form(pose_landmarks, image1, prop, image)
                     elif(control_string == "Горбинка на носу: "):
                         main = detectVector.hump_nose(predictor_model, file_name,pose_landmarks)
                     elif(control_string == "Скулы выше уровня глаз: "):
@@ -235,13 +263,13 @@ def analyzer(control_string,dir,file_num):
                     elif(control_string == "Широко-посаженные глаза: "):
                         main = detect.eye_posadka(pose_landmarks)
                     elif(control_string == "Голубые глаза: "):
-                        main,a,b,c=detect.eye_color(pose_landmarks, image1)
+                        main,a,b,c=detectEugene.eye_color(pose_landmarks, image1)
                     elif(control_string == "Зеленые глаза: "):
-                        a,main,b,c=detect.eye_color(pose_landmarks, image1)
+                        a,main,b,c=detectEugene.eye_color(pose_landmarks, image1)
                     elif(control_string == "Карие и черные глаза: "):
-                        a,b,main,c=detect.eye_color(pose_landmarks, image1)
+                        a,b,main,c=detectEugene.eye_color(pose_landmarks, image1)
                     elif(control_string == "Серые глаза: "):
-                        a,b,c,main=detect.eye_color(pose_landmarks, image1)
+                        a,b,c,main=detectEugene.eye_color(pose_landmarks, image1)
                     elif(control_string == "Большой подбородок: "):
                         main = detect.chin_size(pose_landmarks, prop)
                     elif(control_string == "Маленький подбородок: "):
@@ -297,6 +325,22 @@ def analyzer(control_string,dir,file_num):
                         a,main,b = detectVector.eyelids(predictor_model, file_name,pose_landmarks)
                     elif(control_string == "Веки закрытые снаружи: "):
                         a,b,main = detectVector.eyelids(predictor_model, file_name,pose_landmarks)
+                    elif(control_string == "Тонкие брови: "):
+                        main, a = detectEugene.eyebrows_height(pose_landmarks, image1, prop)
+                    elif(control_string == "Широкие брови: "):
+                        a, main = detectEugene.eyebrows_height(pose_landmarks, image1, prop)
+                    elif(control_string == "Вода на: "):
+                        main,a,b = detectEugene.face_form(pose_landmarks, image1, prop)
+                    elif(control_string == "Ветер на: "):
+                        a,main,b = detectEugene.face_form(pose_landmarks, image1, prop)
+                    elif(control_string == "Огонь на: "):
+                        a,b,main = detectEugene.face_form(pose_landmarks, image1, prop)
+                    elif(control_string == "Лопоухий: "):
+                        main, a = detectEugene.ear_size(pose_landmarks, image1, prop)
+                    elif(control_string == "Прижатые уши: "):
+                        a, main = detectEugene.ear_size(pose_landmarks, image1, prop)
+
+   
                         
                     worksheet.write(row, 3, control_string)
                     if(main >=0 ):

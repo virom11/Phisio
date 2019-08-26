@@ -1,4 +1,16 @@
 #!/usr/bin/python
+'''
+--------------------------------------------------------------------
+def asymmetry(predictor_model,file_name):
+def nose(predictor_model,file_name,pose_landmarks):
+def nose_size(predictor_model,file_name,pose_landmarks):
+def nose_wings(predictor_model,file_name,pose_landmarks):
+def hump_nose(predictor_model,file_name,pose_landmarks):
+def forehead(predictor_model,file_name,pose_landmarks):
+def eyelids(predictor_model,file_name,pose_landmarks):
+def hair_color(predictor_model,file_name,pose_landmarks):
+--------------------------------------------------------------------
+'''
 
 import math
 import numpy as np
@@ -14,6 +26,9 @@ import openface
 import matplotlib.pyplot as plt
 import matplotlib.transforms as mtransforms
 import scriptsVector
+from colormath.color_objects import sRGBColor, LabColor
+from colormath.color_conversions import convert_color
+from colormath.color_diff import delta_e_cie2000
 
 def asymmetry(predictor_model,file_name):
     pose_landmarks=scriptsVector.face_aligner_func(predictor_model,file_name)
@@ -36,7 +51,6 @@ def asymmetry(predictor_model,file_name):
 def nose(predictor_model,file_name,pose_landmarks):
     im = Image.open(file_name) # Can be many different formats.
     pix = im.load()
-    #print('Image Size: '+str(im.size))  # Get the width and hight of the image for iterating over
     limit_y1=round(pose_landmarks.part(27).y)
     limit_y2=round(2*pose_landmarks.part(27).y-pose_landmarks.part(28).y)
     x1=pose_landmarks.part(27).x
@@ -116,7 +130,6 @@ def nose_wings(predictor_model,file_name,pose_landmarks):
         a=35
         b=42
 
-    #print('Image Size: '+str(im.size))  # Get the width and hight of the image for iterating over
     limit_y1=round(pose_landmarks.part(30).y+((pose_landmarks.part(29).y-pose_landmarks.part(30).y)*0.35))
     limit_y2=round(pose_landmarks.part(28).y+((pose_landmarks.part(28).y-pose_landmarks.part(29).y)*0.25))
     x1=pose_landmarks.part(a).x
@@ -125,9 +138,7 @@ def nose_wings(predictor_model,file_name,pose_landmarks):
     y2=pose_landmarks.part(b).y
     y=limit_y1
     first_color=pix[round(((y-y1)*(x2-x1)+x1*(y2-y1))/(y2-y1)),y]
-    #print('first_color: '+str(first_color))
     average_f=(first_color[0]+first_color[1]+first_color[2])/3
-    #print('average_f: '+str(average_f))
     flag=0
     minimal=average_f
     maximum=0
@@ -161,8 +172,6 @@ def hump_nose(predictor_model,file_name,pose_landmarks):
     hump_nose = 0
     im = Image.open(file_name) # Can be many different formats.
     pix = im.load()
-    #print('Image Size: '+str(im.size))  # Get the width and hight of the image for iterating over
-
     distance_1=scriptsVector.distance(pose_landmarks.part(27).x,pose_landmarks.part(27).y,pose_landmarks.part(0).x,pose_landmarks.part(0).y)
     distance_2=scriptsVector.distance(pose_landmarks.part(27).x,pose_landmarks.part(27).y,pose_landmarks.part(16).x,pose_landmarks.part(16).y)
     #print('distance_1: '+str(distance_1))
@@ -224,18 +233,16 @@ def forehead(predictor_model,file_name,pose_landmarks):
     convex=0
     im = Image.open(file_name) # Can be many different formats.
     pix = im.load()
-    #print('Image Size: '+str(im.size))  # Get the width and hight of the image for iterating over
     x1=pose_landmarks.part(18).x
     x2=pose_landmarks.part(25).x
     y1=pose_landmarks.part(18).y
     y2=pose_landmarks.part(25).y
     x=round(x1)
     yn=(2*pose_landmarks.part(18).y-pose_landmarks.part(37).y)
-    y=round((((y2-y1)*(x-x1))+yn*(x2-x1))/(x2-x1))
-    #first_color=pix[x,y]
-    #print('first_color: '+str(first_color))
-    #average_f=(first_color[0]+first_color[1]+first_color[2])/3
-    #print('average_f: '+str(average_f))
+    x_data=[]
+    r=[]
+    g=[]
+    b=[]
 
     max=0
     min=255
@@ -243,25 +250,93 @@ def forehead(predictor_model,file_name,pose_landmarks):
     while((x<x2) and (x>0)):
         y=round((((y2-y1)*(x-x1))+yn*(x2-x1))/(x2-x1))
         second_color=pix[x,y]
-        #print('x: '+str(x))
-        #print('y: '+str(y))
+        r.append(second_color[0])
+        g.append(second_color[1])
+        b.append(second_color[2])
+        x_data.append(x)
+        x+=1
+
+    x=round(x1+(x2-x1)*0.25)
+    print(x1)
+    print(x2)
+    print(round(x1+abs(x2-x1)*0.25))
+    print(round(x1+abs(x2-x1)*0.75))
+    half_x=[]
+    half=[]
+    while x<round(x1+(x2-x1)*0.75):
+        half_x.append(x)
+        half.append(-1)
+        x+=1
+
+    sum_changes=[]
+    i=1
+    sum_changes.append(math.sqrt((r[i]-r[i-1])**2+(g[i]-g[i-1])**2+(b[i]-b[i-1])**2))
+    sum=0
+    while(i<len(r)):
+        sum_changes.append(math.sqrt((r[i]-r[i-1])**2+(g[i]-g[i-1])**2+(b[i]-b[i-1])**2))
+        sum+=math.sqrt((r[i]-r[i-1])**2+(g[i]-g[i-1])**2+(b[i]-b[i-1])**2)
+        i+=1
+    aver=sum/len(r)
+
+    start=x1
+    end=x2
+    i=round(len(sum_changes)*0.25)
+    while (i>0):
+        if(sum_changes[i]>12):
+            start=x1+i
+        i-=1
+    i=round(len(sum_changes)*0.75)
+    while (i<len(sum_changes)):
+        if(sum_changes[i]>12):
+            end=x1+i
+        i+=1
+
+    x=start
+    while(x<end):
+        
+        y=round((((y2-y1)*(x-x1))+yn*(x2-x1))/(x2-x1))
+        second_color=pix[x,y]
         average_s=(second_color[0]+second_color[1]+second_color[2])/3
-        #print('average_s: '+str(average_s))
+        pix[x,y] = (255,255,255)
+
         if(average_s<min):
             min=average_s
         if(average_s>max):
             max=average_s
-        #pix[x,y] = (255,255,255)
+        
         x+=1
-    if((max-min)>60):
+    print('max: ',max)
+    print('min: ',min)
+
+    dist1=scriptsVector.distance(x1,y1,x2,y2)
+    dist2=scriptsVector.distance(start,round((((y2-y1)*(start-x1))+yn*(x2-x1))/(x2-x1)),end,round((((y2-y1)*(end-x1))+yn*(x2-x1))/(x2-x1)))
+
+    if((max-min)>130):
         smooth=0
+    elif((max-min)>50 and (max-min)<130):
+        smooth=(100-(max-min-40)/0.8)*(dist2/dist1)
     else:
         smooth=100
+    
+    #fig = plt.figure()
+    # Добавление на рисунок прямоугольной (по умолчанию) области рисования
+    #graph1 = plt.plot(x_data, r, color='red', label = 'r|max'+str(int(max)))
+    #graph1 = plt.plot(x_data, g, color='green', label = u'g|min'+str(int(min)))
+    #graph1 = plt.plot(x_data, b, color='blue', label = u'b|dif'+str(int(abs(min-max))))
+
+    #graph1 = plt.plot(x_data, sum_changes, color='black', label = 's_ch')
+
+    #plt.legend()
+    #grid1 = plt.grid(True) # линии вспомогательной сетки
+
+    #plt.show()
+    #fig.savefig(file_name.replace(".jpg", "_.jpg"))
+
     convex=100-smooth
-    #print('smooth: '+str(smooth))
-    #print('convex: '+str(convex))
+    print('convex: ',convex)
+    print('smooth: ',smooth)
         
-    #im.save(file_name)
+    im.save(file_name.replace(".jpg", "_line.jpg"))
     return smooth,convex
 
 def eyelids(predictor_model,file_name,pose_landmarks):
@@ -272,10 +347,7 @@ def eyelids(predictor_model,file_name,pose_landmarks):
     pix = im.load()
     distance_1=scriptsVector.distance(pose_landmarks.part(27).x,pose_landmarks.part(27).y,pose_landmarks.part(0).x,pose_landmarks.part(0).y)
     distance_2=scriptsVector.distance(pose_landmarks.part(27).x,pose_landmarks.part(27).y,pose_landmarks.part(16).x,pose_landmarks.part(16).y)
-    #print('distance_1: '+str(distance_1))
-    #print('distance_2: '+str(distance_2))
-    
-    #round(((y-y1)*(x2-x1)+x1*(y2-y1))/(y2-y1))
+
     if(distance_1>distance_2):
         a=36
     else:
@@ -303,28 +375,28 @@ def eyelids(predictor_model,file_name,pose_landmarks):
             y_data.append(y)
             average_s_data.append(average_s)
             #print(str(average_f))
-            #pix[pose_landmarks.part(a+counter).x,y] = (255,255,255)
+            pix[pose_landmarks.part(a+counter).x,y] = (255,255,255)
             y-=1
-        # Creates just a figure and only one subplot
-        #fig, ax = plt.subplots()
-        #ax.plot(y_data, average_s_data)
-        #ax.set_title('Plot of point: ' + str(a+counter))
-        #fig.savefig(file_name.replace(".jpg",str(a+counter)+"_.jpg"))
-        
+        fig = plt.figure()
+        # Добавление на рисунок прямоугольной (по умолчанию) области рисования
+        graph1 = plt.plot(y_data, average_s_data, label = str(a+counter))
+
+        plt.legend()
+        grid1 = plt.grid(True) # линии вспомогательной сетки
+
+        #plt.show()
+        fig.savefig(file_name.replace(".jpg", str(a+counter)+"__.jpg"))
+
         test_data = average_s_data[0]
         diff=[]
         for data in average_s_data:
-            if(test_data>data)and((test_data-data)>6):
+            if(test_data>data)and((test_data-data)>5):
                 diff.append(1)
                 test_data=data
             else:
                 diff.append(0)
                 test_data=data
 
-        #fig, ax = plt.subplots()
-        #ax.plot(y_data, diff)
-        #ax.set_title('Plot of diff of point: ' + str(a+counter))
-        #fig.savefig(file_name.replace(".jpg",str(a+counter)+"_diff.jpg"))
         
         if 1 in diff:
             flag.append(1)
@@ -332,21 +404,34 @@ def eyelids(predictor_model,file_name,pose_landmarks):
             flag.append(0)
         counter+=1
 
-    if (flag[0]==1 and flag[1]==1 and flag[2]==1 and flag[3]==1):
+    if (flag[1]==0 and flag[2]==0):
         center=100
-    elif(flag[0]==0 and flag[1]==1 and flag[2]==1 and flag[3]==1):
-        center=200/3
-    elif(flag[0]==0 and flag[1]==0 and flag[2]==1 and flag[3]==1):
-        center=100/3
-    elif(flag[0]==0 and flag[1]==0 and flag[2]==0 and flag[3]==1):
-        center=0
-    else:
-        outside = 100
+    if (flag[1]==0 and flag[2]==1):
+        center=50
+    if (flag[1]==1 and flag[2]==0):
+        center=50
+    if (flag[0]==1 and flag[3]==1):
+        inside=100
+        outside=100
+
+    if (flag[0]==0 and flag[3]==1 and a==36):
+        outside=100
+    if (flag[0]==1 and flag[3]==0 and a==36):
+        inside=100
+    if (flag[0]==0 and flag[3]==1 and a==42):
+        inside=100
+    if (flag[0]==1 and flag[3]==0 and a==42):
+        outside=100
+    if (flag[0]==0 and flag[3]==0):
+        inside=100
+        outside=100
+    if (flag[0]==1 and flag[3]==1):
+        inside=0
+        outside=0
     
-    inside=100-center
-    #im.save(file_name)
     
-    #plt.show()
+
+    im.save(file_name.replace(".jpg", "_line.jpg"))
     return inside, center, outside
 
 
@@ -356,9 +441,8 @@ def hair_color(predictor_model,file_name,pose_landmarks):
     orange=0
     im = Image.open(file_name) # Can be many different formats.
     pix = im.load()
-    #print('Image Size: '+str(im.size))  # Get the width and hight of the image for iterating over
     limit_y1=round(pose_landmarks.part(27).y)
-    limit_y2=round(2*pose_landmarks.part(27).y-pose_landmarks.part(28).y)
+    limit_y2=round(pose_landmarks.part(27).y-(pose_landmarks.part(8).y-pose_landmarks.part(27).y))
     x1=pose_landmarks.part(27).x
     x2=pose_landmarks.part(33).x
     y1=pose_landmarks.part(27).y
@@ -369,26 +453,48 @@ def hair_color(predictor_model,file_name,pose_landmarks):
     average_f=(first_color[0]+first_color[1]+first_color[2])/3
     #print('average_f: '+str(average_f)) 
     y_data=[]
-    average_data=[]
+    r=[]
+    g=[]
+    b=[]
     counter=0
+    flag = 0 
     
-    while(y>0):
-        counter+=1
+    while(y>limit_y2)and(flag==0):
         pix_x=round(((y-y1)*(x2-x1)+x1*(y2-y1))/(y2-y1))
         second_color=pix[pix_x,y]
         average_s=(second_color[0]+second_color[1]+second_color[2])/3
+        
         y_data.append(y)
-        average_data.append(average_s)
+        r.append(second_color[0])
+        g.append(second_color[1])
+        b.append(second_color[2])
+        if(counter>1):
+            r_color=r[counter-1]
+            g_color=g[counter-1]
+            b_color=b[counter-1]
+            color1_rgb = sRGBColor(r_color / 255, g_color / 255, b_color / 255)
+
+            # Convert from RGB to Lab Color Space
+            color1_lab = convert_color(color1_rgb, LabColor)
+            r_color=r[counter]
+            g_color=g[counter]
+            b_color=b[counter]
+            color2_rgb = sRGBColor(r_color / 255, g_color / 255, b_color / 255)
+
+            # Convert from RGB to Lab Color Space
+            color2_lab = convert_color(color2_rgb, LabColor)
+            delta_e = delta_e_cie2000(color1_lab, color2_lab)
+
+            if(delta_e > 7):
+                flag==1
         # Get the RGBA Value of the a pixel of an image
         #pix[pix_x,y] = (255,255,255)  # Set the RGBA Value of the image (tuple)
+        
+        counter+=1
         y-=1
-    #im.save(file_name)
     
-    fig, ax = plt.subplots()
-    ax.plot(y_data, average_data)
-    #ax.set_title('Plot of point: ' + str(a+counter))
-    fig.savefig(file_name.replace(".jpg","_.jpg"))
-
+    light=(0.299*second_color[0] + 0.587*second_color[1] + 0.114*second_color[2])/2.55
+    dark=100-light
+    orange=(abs(255-second_color[0])+abs(second_color[1]-102)+second_color[2])/6.63
 
     return light, dark, orange
-
