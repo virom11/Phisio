@@ -29,6 +29,8 @@ import scriptsVector
 from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
+import scipy.signal
+
 
 def asymmetry(predictor_model,file_name):
     pose_landmarks=scriptsVector.face_aligner_func(predictor_model,file_name)
@@ -350,89 +352,346 @@ def eyelids(predictor_model,file_name,pose_landmarks):
 
     if(distance_1>distance_2):
         a=36
+        b=17
     else:
         a=42
+        b=22
 
     counter=0
-    flag=[]
-    while(counter<4):
-        limit_y1=round(pose_landmarks.part(a+counter).y)
-        if(a==36):
-            limit_y2=round((pose_landmarks.part(a+counter).y)-(pose_landmarks.part(41).y-pose_landmarks.part(37).y))
-        else:
-            limit_y2=round((pose_landmarks.part(a+counter).y)-(pose_landmarks.part(46).y-pose_landmarks.part(44).y))
-        
-        x1=pose_landmarks.part(27).x
-        x2=pose_landmarks.part(33).x
-        y1=pose_landmarks.part(27).y
-        y2=pose_landmarks.part(33).y
-        y=limit_y1
-        y_data=[]
-        average_s_data=[]
-        while(y>limit_y2):
-            color=pix[round(((y-y1)*(x2-x1)+pose_landmarks.part(a+counter).x*(y2-y1))/(y2-y1)),y]
-            average_s=(color[0]+color[1]+color[2])/3
-            y_data.append(y)
-            average_s_data.append(average_s)
-            #print(str(average_f))
-            pix[pose_landmarks.part(a+counter).x,y] = (255,255,255)
-            y-=1
-        fig = plt.figure()
-        # Добавление на рисунок прямоугольной (по умолчанию) области рисования
-        graph1 = plt.plot(y_data, average_s_data, label = str(a+counter))
-
-        plt.legend()
-        grid1 = plt.grid(True) # линии вспомогательной сетки
-
-        #plt.show()
-        fig.savefig(file_name.replace(".jpg", str(a+counter)+"__.jpg"))
-
-        test_data = average_s_data[0]
-        diff=[]
-        for data in average_s_data:
-            if(test_data>data)and((test_data-data)>5):
-                diff.append(1)
-                test_data=data
-            else:
-                diff.append(0)
-                test_data=data
-
-        
-        if 1 in diff:
-            flag.append(1)
-        else:
-            flag.append(0)
+    ym=pose_landmarks.part(b).y
+    xm=pose_landmarks.part(b).x
+    while counter<5:
+        if pose_landmarks.part(b+counter).y<ym:
+            ym=round(pose_landmarks.part(b+counter).y+(pose_landmarks.part(a+2).y-pose_landmarks.part(b+counter).y)*0.25)
+            xm=pose_landmarks.part(b+counter).x
         counter+=1
+        
+    data=[[],[]]
 
-    if (flag[1]==0 and flag[2]==0):
-        center=100
-    if (flag[1]==0 and flag[2]==1):
-        center=50
-    if (flag[1]==1 and flag[2]==0):
-        center=50
-    if (flag[0]==1 and flag[3]==1):
-        inside=100
-        outside=100
+    ya=pose_landmarks.part(a).y
+    xa=pose_landmarks.part(a).x
+    ya1=pose_landmarks.part(a+1).y
+    xa1=pose_landmarks.part(a+1).x
+    ya2=pose_landmarks.part(a+2).y
+    xa2=pose_landmarks.part(a+2).x
+    ya3=pose_landmarks.part(a+3).y
+    xa3=pose_landmarks.part(a+3).x
+    x27=pose_landmarks.part(27).x
+    y27=pose_landmarks.part(27).y
+    x33=pose_landmarks.part(33).x
+    y33=pose_landmarks.part(33).y
+    xa12=round((pose_landmarks.part(a+1).x + pose_landmarks.part(a+2).x)/2)
+    ya12=round((pose_landmarks.part(a+1).y + pose_landmarks.part(a+2).y)/2)
+    
+    #sum=0
+    #counter=0
+    x_val={}
+    min_x=im.size[0]
+    min_y=im.size[1]
+    max_x=0
+    max_y=0
+    x=0
+    while(x<im.size[0]):
 
-    if (flag[0]==0 and flag[3]==1 and a==36):
-        outside=100
-    if (flag[0]==1 and flag[3]==0 and a==36):
-        inside=100
-    if (flag[0]==0 and flag[3]==1 and a==42):
-        inside=100
-    if (flag[0]==1 and flag[3]==0 and a==42):
-        outside=100
-    if (flag[0]==0 and flag[3]==0):
-        inside=100
-        outside=100
-    if (flag[0]==1 and flag[3]==1):
+        y=0
+        while(y<im.size[1]):
+            #Если кто-то это увидит, не пугайтесь. Писал в угаре, но он работает. 
+            if(scriptsVector.radical(scriptsVector.test_line(x,y,xa,ya,xa3,ya3,x11=xa,y11=ya),scriptsVector.test_line(x,y,xa,ya,xa3,ya3,x11=xm,y11=ym)) and
+               scriptsVector.radical(scriptsVector.test_line(x,y,x33,y33,x27,y27,x11=xa,y11=ya),scriptsVector.test_line(x,y,x33,y33,x27,y27,x11=xa3,y11=ya3))):                    
+                if(((x<xa1) and (scriptsVector.radical(scriptsVector.test_line(x,y,xa,ya,xa3,ya3,x11=xa,y11=ya),scriptsVector.test_line(x,y,xa,ya,xa1,ya1,x11=xa,y11=ya))) == False) 
+                or ((x>xa1) and (x<xa2) and (scriptsVector.radical(scriptsVector.test_line(x,y,xa,ya,xa3,ya3,x11=xa,y11=ya),scriptsVector.test_line(x,y,xa1,ya1,xa2,ya2,x11=xa1,y11=ya1))) == False) 
+                or ((x>xa2) and (scriptsVector.radical(scriptsVector.test_line(x,y,xa,ya,xa3,ya3,x11=xa,y11=ya),scriptsVector.test_line(x,y,xa2,ya2,xa3,ya3,x11=xa2,y11=ya2))) == False) 
+                or (x==xa1 and y<ya1) or (x==xa2 and y<ya2) or (x==xa and y<ya2)):
+                    
+                    color=pix[x,y]
+                    if(x>max_x):
+                        max_x=x
+                    if(y>max_y):
+                        max_y=y
+                    if(x<min_x):
+                        min_x=x
+                    if(y<min_y):
+                        min_y=y
+                    color=round((color[0]+color[1]+color[2])/3)
+                    #sum+=color
+                    counter+=1
+                    cords=[]
+                    cords.append(x)
+                    cords.append(y)
+                    data[0].append(cords)
+                    data[1].append(color)
+            y+=1
+        x+=1
+    max_value=0
+    x=min_x
+    
+    data_edges=[[],[]]
+    while(x<=max_x):
+        y=min_y
+        if((x in x_val) == False) and x>xa and x<xa3:
+            x_val[x]=y
+
+
+        while(y<=max_y):            
+            #print('x',x ,'y',y)
+            cords=[]
+            cords.append(x)
+            cords.append(y)
+            max_delta=0
+            sum_delta=0
+            counter=0
+            if cords in data[0]:
+                if (x in x_val) and (x_val[x]<y):
+                        x_val[x]=y
+                if ([cords[0],cords[1]-1] in data[0]):
+                    delta=abs(data[1][data[0].index([cords[0],cords[1]-1])]-data[1][data[0].index(cords)])
+                    counter+=1
+                    sum_delta+=delta
+                    if(max_delta<delta):
+                        max_delta=delta
+                if [cords[0],cords[1]+1] in data[0]:
+                    delta=abs(data[1][data[0].index([cords[0],cords[1]+1])]-data[1][data[0].index(cords)])
+                    counter+=1
+                    sum_delta+=delta
+                    if(max_delta<delta):
+                        max_delta=delta
+                if [cords[0]-1,cords[1]] in data[0]:
+                    delta=abs(data[1][data[0].index([cords[0]-1,cords[1]])]-data[1][data[0].index(cords)])
+                    counter+=1
+                    sum_delta+=delta
+                    if(max_delta<delta):
+                        max_delta=delta
+                if [cords[0]+1,cords[1]] in data[0]:
+                    delta=abs(data[1][data[0].index([cords[0]+1,cords[1]])]-data[1][data[0].index(cords)])
+                    counter+=1
+                    sum_delta+=delta
+                    if(max_delta<delta):
+                        max_delta=delta
+                if ([cords[0]+1,cords[1]+1] in data[0]):
+                    delta=abs(data[1][data[0].index([cords[0]+1,cords[1]+1])]-data[1][data[0].index(cords)])
+                    counter+=1
+                    sum_delta+=delta
+                    if(max_delta<delta):
+                        max_delta=delta
+                if ([cords[0]-1,cords[1]+1] in data[0]):
+                    delta=abs(data[1][data[0].index([cords[0]-1,cords[1]+1])]-data[1][data[0].index(cords)])
+                    counter+=1
+                    sum_delta+=delta
+                    if(max_delta<delta):
+                        max_delta=delta
+                if ([cords[0]+1,cords[1]-1] in data[0]):
+                    delta=abs(data[1][data[0].index([cords[0]+1,cords[1]-1])]-data[1][data[0].index(cords)])
+                    counter+=1
+                    sum_delta+=delta
+                    if(max_delta<delta):
+                        max_delta=delta
+                if ([cords[0]-1,cords[1]-1] in data[0]):
+                    delta=abs(data[1][data[0].index([cords[0]-1,cords[1]-1])]-data[1][data[0].index(cords)])
+                    counter+=1
+                    sum_delta+=delta
+                    if(max_delta<delta):
+                        max_delta=delta
+                
+                data_edges[0].append(cords)
+                #max_delta=max_delta*4
+                max_delta=round(sum_delta/counter)*4
+                if(max_delta>255):
+                    max_delta=255
+                
+                if(max_delta>max_value):
+                    max_value=max_delta
+                data_edges[1].append(max_delta)
+                #print(cords,max_delta)
+                
+            y+=1
+
+        x+=1
+
+    x=min_x
+    while(x<=max_x):
+        y=min_y
+        while(y<=max_y):
+            cords=[]
+            cords.append(x)
+            cords.append(y)
+            max_delta=0
+            if cords in data_edges[0]:
+                color=data_edges[1][data_edges[0].index(cords)]
+                if(color>=round(max_value*0.3)):
+                    data_edges[1][data_edges[0].index(cords)]=255
+                    pix[x,y]=(255,255,255)
+                elif(color<round(max_value*0.3)):
+                    data_edges[1][data_edges[0].index(cords)]=0
+                    pix[x,y]=(0,0,0)
+            y+=1
+
+        x+=1
+
+    #print(x_val)
+    edges=[]
+    j=0
+    g=0
+    counter=0
+    edge_counter=0
+    dop_percent=[0,0,0]
+    for x_v in x_val:
+        j+=1
+        counter+=1
+        pix[x_v, x_val[x_v]]=(255,255,0)
+
+        y=min_y
+        if x_v==xa1:
+            g+=1
+            edges.append(round(edge_counter/counter))
+            light_list=[]
+            counter=0
+            edge_counter=0
+
+        if x_v==xa2:
+            g+=1
+            edges.append(round(edge_counter/counter))
+            light_list=[]
+            counter=0
+            edge_counter=0
+
+        light_list=[]
+        while(y<max_y):
+            
+            #print("x",x_v,'y',x_val[x_v])
+            x=round(((y-x_val[x_v])*(x33-x27)+x_v*(y33-y27))/(y33-y27))
+            cords=[]
+            cords.append(x)
+            cords.append(y)
+            if cords in data_edges[0]:
+                color=data_edges[1][data_edges[0].index(cords)]
+                cvet=pix[x,y]
+                cvet1=cvet[0]
+                cvet2=cvet[1]
+                cvet3=cvet[2]
+                
+                cvet=pix[x,y]
+                if(j%10==0):
+                    if(cvet[0]<155):
+                        cvet1=cvet[0]+100
+                        cvet2=cvet[1]
+                        cvet3=cvet[2]
+                    else:
+                        cvet1=255
+                        cvet2=155
+                        cvet3=155
+                elif(j%10==4):
+                    if(cvet[1]<155):
+                        cvet1=cvet[0]
+                        cvet2=cvet[1]+100
+                        cvet3=cvet[2]
+                    else:
+                        cvet1=155
+                        cvet2=255
+                        cvet3=155
+                elif(j%10==7):
+                    if(cvet[2]<155):
+                        cvet1=cvet[0]
+                        cvet2=cvet[1]
+                        cvet3=cvet[2]+100
+                    else:
+                        cvet1=155
+                        cvet2=155
+                        cvet3=255
+                
+                pix[x,y]=(cvet1,cvet2,cvet3)
+
+                light_list.append(color)
+            y+=1
+
+
+        i=0
+        white_counter=0
+        while i<len(light_list)-1:
+
+            if light_list[i]==255:
+                white_counter+=1
+            else:
+                white_counter=1
+
+            if white_counter>1 and white_counter<6 and light_list[i]!=light_list[i+1]:
+                edge_counter+=1
+
+            if white_counter>6:
+                dop_percent[g]=100/white_counter
+
+            i+=1
+            
+    edges.append(round(edge_counter/counter))
+    counter=0
+    edge_counter=0
+    val1=dop_percent[0]
+    val2=dop_percent[1]
+    val3=dop_percent[2]
+
+    print(edges)
+
+    if edges[0]<1 and a==36:
         inside=0
+    elif edges[0]<1 and a==42:
         outside=0
-    
-    
 
-    im.save(file_name.replace(".jpg", "_line.jpg"))
+    if edges[0]==1 and a==36:
+        if(100/3+val1<=100):
+            inside=100/3+val1
+        else:
+            inside=100/3
+    elif edges[0]==1 and a==42:
+        if(100/3+val1<=100):
+            outside=100/3+val1
+        else:
+            outside=100/3
+
+    if edges[0]>1 and a==36:
+        inside=100
+    elif edges[0]>1 and a==42:
+        outside=100
+
+##########
+
+    if edges[1]<1:
+        center=0
+
+    if edges[1]==1:
+        if((100/3+val2)<=100):
+            center=100/3+val2
+        else:
+            center=100/3
+
+    if edges[1]>1:
+        center=100
+    
+########
+
+    if edges[2]<1 and a==42:
+        inside=0
+    elif edges[2]<1 and a==36:
+        outside=0
+
+    if edges[2]==1 and a==42:
+        if(100/3+val3<=100):
+            inside=100/3+val3
+        else:
+            inside=100/3
+    elif edges[2]==1 and a==36:
+        if(100/3+val3<=100):
+            outside=100/3+val3
+        else:
+            outside=100/3
+
+    if edges[2]>1 and a==42:
+        inside=100
+    elif edges[2]>1 and a==36:
+        outside=100
+
+    im.save(file_name.replace(".jpg", "_line.png"))
+    print('in',inside,'ce', center,'out', outside)
     return inside, center, outside
+
 
 
 def hair_color(predictor_model,file_name,pose_landmarks):
@@ -498,3 +757,4 @@ def hair_color(predictor_model,file_name,pose_landmarks):
     orange=(abs(255-second_color[0])+abs(second_color[1]-102)+second_color[2])/6.63
 
     return light, dark, orange
+

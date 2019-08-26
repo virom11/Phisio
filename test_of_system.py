@@ -36,6 +36,7 @@ import detect
 import detectEugene
 import detectVector
 from features_list import features_list
+from sys import platform
 
 priznak = []
 for i in range(0, 66):

@@ -83,3 +83,12 @@ def graf(x_data=[],y_data=[], title=None, save = False, file_name='Empty_name', 
 
 def image_size_printer(im):
     print('Image Size: '+str(im.size))
+
+def test_line(x,y,x1,y1,x2,y2,x11, y11):
+    return (y-y11)*(x2-x1)-(x-x11)*(y2-y1)
+
+def radical(a,b):
+    if (a>0 and b<0) or (a<0 and b>0):
+        return True
+    else:
+        return False 
