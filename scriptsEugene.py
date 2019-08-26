@@ -286,7 +286,7 @@ def eyebrows_height_1(pose, image, scale, pose_number1 = 20, pose_number2 = 38):
 
 
 
-class Ear(object):
+class Ear1(object):
 		x = 0
 		y = 0
 		length = 0
@@ -346,6 +346,76 @@ class Ear(object):
 
 				x += lendir_x
 				y += lendir_y
+
+			if length == 50:
+				length = 0
+
+			self.x = x
+			self.y = y
+			self.length = length
+
+
+class Ear(object):
+		x = 0
+		y = 0
+		length = 0
+
+    # The class "constructor" - It actually an initializer 
+		def __init__(self, pose, image, scale, pose_number1 = 1, pose_number2 = 28):
+
+			# Создание точкек Ушей
+			dir_ = point_direction(pose.part(pose_number2).x, pose.part(pose_number2).y, pose.part(pose_number1).x, pose.part(pose_number1).y)
+
+			lendir_x, lendir_y = lengthDir(scale/200, dir_)
+
+			length = 0
+			summ = 0
+			average = 0
+			sub_scale = 5
+
+			x_ = pose.part(29).y + (pose.part(15).y - pose.part(29).y) / 2
+			y_ = pose.part(26).y + (pose.part(12).y - pose.part(26).y) / 2
+
+			x = pose.part(pose_number1).x +  length * lendir_x
+			y = pose.part(pose_number1).y +  length * lendir_y
+
+			try:
+				r, g, b = get_dominate_color(x_ - 15, x_ + 15, y_ - 15, y + 15, image, 3)
+				color2_rgb = sRGBColor(r / 255, g / 255, b / 255);
+			except:
+				x = 0
+				y = 0
+				length = 0
+			else:
+				while (length != 25):
+					r, g, b = get_dominate_color(round(x) - sub_scale, round(x) + sub_scale, round(y) - sub_scale, round(y) + sub_scale, image, 3)
+
+					color1_rgb = sRGBColor(r / 255, g / 255, b / 255);
+
+					# Convert from RGB to Lab Color Space
+					color1_lab = convert_color(color1_rgb, LabColor);
+
+					# Convert from RGB to Lab Color Space
+					color2_lab = convert_color(color2_rgb, LabColor);
+
+					# Find the color difference
+					delta_e = delta_e_cie2000(color1_lab, color2_lab);
+
+					#if pose_number == 27:
+					#	print("The difference between the 2 color = ", delta_e)
+
+					if length > 10:
+						if (delta_e > 20):
+							break
+
+					summ += delta_e
+					length += 1
+					average = summ / length
+
+					#color2_rgb = color1_rgb
+
+					x += lendir_x
+					y += lendir_y
 
 			if length == 50:
 				length = 0

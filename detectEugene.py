@@ -7,9 +7,17 @@ from PIL import Image, ImageDraw
 from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
+from functools import reduce
 
 import dlib
 import time
+
+import numpy as np
+import matplotlib.pyplot as plt
+from skimage.color import rgb2gray
+from skimage import data
+from skimage.filters import gaussian
+from skimage.segmentation import active_contour
 
 from scriptsEugene import *
 
@@ -243,7 +251,7 @@ def worlds(pose, image, scale):
 	
 
 # Размер уха
-def ear_size(pose, image, scale):
+def ear_size(pose, image, scale, im):
 	ear = [0, 0, 0, 0]
 	ear[0], ear[1], ear[2], ear[3] = add_ear(pose, image, scale)
 
@@ -255,10 +263,106 @@ def ear_size(pose, image, scale):
 	if length == 0:
 		#return "Фотография неправильного формата", "Фотография неправильного формата"
 		return -1,-1
+	'''
+	win = dlib.image_window()
+	im[round(ear[0].y),round(ear[0].x)]=[255,0,0]
+	im[round(ear[1].y),round(ear[1].x)]=[255,0,0]
 
-	length = clamp((length - 3) * 3.3, 0, 100)
+	win.set_image(im)
+	time.sleep(7)
+	'''
+	img = rgb2gray(im)
 
-	return length, 100 - length
+	dir_ = point_direction(pose.part(0).x, pose.part(0).y, pose.part(3).x, pose.part(3).y) * (np.pi/180)
+	dist = distance(pose.part(0).x, pose.part(0).y, pose.part(1).x, pose.part(1).y) 
+	s = np.linspace(0, np.pi, 400)
+	x = pose.part(1).x + 3 + dist*np.cos(s + dir_)
+	y = pose.part(1).y + dist*2*np.sin(s + dir_)
+	init1 = np.array([x, y]).T
+
+	snake1 = active_contour(gaussian(img, 3), init1, alpha=0.015, beta=10, gamma=0.001, bc="fixed", w_edge=2)
+
+	########################
+	dir_ = point_direction(pose.part(13).x, pose.part(13).y, pose.part(16).x, pose.part(16).y) * (np.pi/180)
+	#dist = distance(pose.part(16).x, pose.part(16).y, ear[1].x, ear[1].y) 
+	s = np.linspace(0, np.pi, 400)
+	x = pose.part(15).x - 3 + dist*np.cos(s + dir_)
+	y = pose.part(15).y + dist*2*np.sin(s + dir_)
+	init2 = np.array([x, y]).T
+
+	snake2 = active_contour(gaussian(img, 3), init2, alpha=0.015, beta=10, gamma=0.001, bc="fixed", w_edge=2)
+
+	init = np.vstack((init1, init2))
+	#snake = np.vstack((snake1, snake2))
+	'''
+	fig, ax = plt.subplots(figsize=(7, 7))
+	ax.imshow(img, cmap=plt.cm.gray)
+	ax.plot(init[:, 0], init[:, 1], '--r', lw=3)
+	ax.plot(snake1[:, 0], snake1[:, 1], '-b', lw=3)
+	ax.plot(snake2[:, 0], snake2[:, 1], '-b', lw=3)
+	ax.set_xticks([]), ax.set_yticks([])
+	ax.axis([0, img.shape[1], img.shape[0], 0])
+	'''
+	#plt.show()
+
+	dir_ = point_direction(pose.part(28).x, pose.part(28).y, pose.part(1).x, pose.part(1).y)
+	lendir_x, lendir_y = lengthDir(scale/100, dir_)
+
+	length1 = 0
+
+	x = pose.part(1).x
+	y = pose.part(1).y
+
+	while True:
+		
+		min_ = 10000
+		for i in range(0, 400):
+			min_ = min(min_, distance(x, y, snake1[i, 0], snake1[i, 1]))
+		
+		if min_ < scale/50:
+			break
+		
+		#print(min_)
+
+		x += lendir_x
+		y += lendir_y
+
+		length1 += 1
+		if length1 == 50:
+			length1 = 0
+			break
+
+	dir_ = point_direction(pose.part(28).x, pose.part(28).y, pose.part(15).x, pose.part(15).y)
+	lendir_x, lendir_y = lengthDir(scale/100, dir_)
+
+	length2 = 0
+
+	x = pose.part(15).x
+	y = pose.part(15).y
+
+	while True:
+		min_ = 10000
+		for i in range(0, 400):
+			min_ = min(min_, distance(x, y, snake2[i, 0], snake2[i, 1]))
+		
+		if min_ < scale/50:
+			break
+		
+
+		x += lendir_x
+		y += lendir_y
+
+		length2 += 1
+		if length2 == 50:
+			length2 = 0
+			break
+
+	if distance(pose.part(0).x, pose.part(0).y, pose.part(17).x, pose.part(17).y) >= distance(pose.part(16).x, pose.part(16).y, pose.part(26).x, pose.part(26).y):
+		length = length1
+	else:
+		length = length2
+
+	return length, 0
 
 
 

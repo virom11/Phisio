@@ -53,7 +53,7 @@ if(ubuntu):
 else:
 
 	predictor_model = "C:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
-	dir="C:/Dropbox/Студенты/Подбородок/Раздвоенный с вмятиной"
+	dir="C:/Dropbox/Студенты/Уши/Лопоухие уши"
 
 
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
@@ -179,10 +179,10 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             
             priznak[3], priznak[4], priznak[5] = detectEugene.eyebrows(pose_landmarks, prop)
             print("Бровин Домиком: ", priznak[3], "Бровин Полукругом: ", priznak[4], "Бровин Линией: ", priznak[5])
-            '''
+            
             priznak[44] = detectEugene.fat_chin2(predictor_model,file_name,pose_landmarks, image)
             print("Раздвоенный подбородок: ", priznak[44])
-            '''
+            
             priznak[6] = detectEugene.eyebrows_rise(pose_landmarks, prop)
             print("Бровь с подъёмом: ", priznak[6])
             
@@ -204,12 +204,12 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
 
             priznak[57], priznak[58], priznak[59] = detectEugene.worlds(pose_landmarks, image1, prop)
             print("Духовный: ", priznak[57]," Материальный: ", priznak[58]," Семейный: ", priznak[59])
-            
-            priznak[50], priznak[64] = detectEugene.ear_size(pose_landmarks, image1, prop)
+            '''
+            priznak[50], priznak[64] = detectEugene.ear_size(pose_landmarks, image1, prop, image)
             print("Лопоухий: ", priznak[50], "Прижатые уши: ", priznak[64])
-            
+            '''
             priznak[47], priznak[49] = detectEugene.ear_check(pose_landmarks, image1, prop)
-            print("Прижатые уши: ", priznak[47], "Квадратная мочка уха: ", priznak[49])
+            print("Прижатая Мочка: ", priznak[47], "Квадратная мочка уха: ", priznak[49])
             
             priznak[45], priznak[46], priznak[63] = detectEugene.cheekbones(pose_landmarks, image1, prop)
             print("Скулы выше уровня глаз: ", priznak[45], "Скулы на уровне глаз: ", priznak[46], "Скулы ниже уровня глаз: ", priznak[63])
