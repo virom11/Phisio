@@ -53,7 +53,7 @@ if(ubuntu):
 else:
 
 	predictor_model = "C:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
-	dir="C:/Dropbox/Студенты/Уши/Лопоухие уши"
+	dir="C:/Dropbox/Студенты/Лоб/Дубровичи"
 
 
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
@@ -188,11 +188,11 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             
             priznak[7], priznak[9] = detectEugene.eyebrows_bold(pose_landmarks, image1)
             print("Брови тёмные, густые:", priznak[9], "Брови светлые, редкие:", priznak[7])
-            
+            '''
             #priznak[32], priznak[34], priznak[55] = detectEugene.forhead_form(pose_landmarks, image1, prop) #круг, М, квадрат
-            priznak[32], priznak[34], priznak[55] = detectEugene.forhead_form(pose_landmarks, image1, prop, image)
+            priznak[32], priznak[34], priznak[55] = detectEugene.forehead_form2(predictor_model, file_name, pose_landmarks, image1, prop)
             print("Волосы лба Полукругом: ", priznak[32], " Буквой М: ", priznak[34], "Квадратный: ", priznak[55])
-            
+            '''
             priznak[35], priznak[56] = detectEugene.forhead_height(pose_landmarks, image1, prop, image)
             print("Лоб Широкий: ", priznak[35], "Лоб Узкий: ", priznak[56])
             
@@ -204,10 +204,10 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
 
             priznak[57], priznak[58], priznak[59] = detectEugene.worlds(pose_landmarks, image1, prop)
             print("Духовный: ", priznak[57]," Материальный: ", priznak[58]," Семейный: ", priznak[59])
-            '''
+            
             priznak[50], priznak[64] = detectEugene.ear_size(pose_landmarks, image1, prop, image)
             print("Лопоухий: ", priznak[50], "Прижатые уши: ", priznak[64])
-            '''
+            
             priznak[47], priznak[49] = detectEugene.ear_check(pose_landmarks, image1, prop)
             print("Прижатая Мочка: ", priznak[47], "Квадратная мочка уха: ", priznak[49])
             

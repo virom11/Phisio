@@ -23,6 +23,10 @@ def dir_between(x1, y1, x2, y2, x3, y3, x4, y4):
 	return math.degrees(math.atan(abs((k1 - k2) / (k1 * k2 + a))))
 
 
+def test_line(x,y,x1,y1,x2,y2,x11, y11):
+	return (y-y11)*(x2-x1)-(x-x11)*(y2-y1)
+
+
 def mean_square(a, b, c = -404):
 	if c == -404:
 		return math.sqrt((a**2 + b**2) / 2)
@@ -486,3 +490,9 @@ def ear_height(pose, image, scale, x, y):
 
 	return length
 
+
+def radical(a,b):
+	if (a>0 and b<0) or (a<0 and b>0):
+		return True
+	else:
+		return False 

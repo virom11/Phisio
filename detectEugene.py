@@ -150,15 +150,6 @@ def forhead_form(pose, image, scale, im):
 	fh_circle = clamp((forhead[1].length - min_forehead) * 12, 0, 100)
 	fh_square = 100 - clamp(abs(forhead[1].length - side_forehead) * 20, 0, 100)
 
-
-	#win = dlib.image_window()
-	#im[round(forhead[0].y),round(forhead[0].x)]=[255,0,0]
-	#im[round(forhead[1].y),round(forhead[1].x)]=[255,0,0]
-	#im[round(forhead[2].y),round(forhead[2].x)]=[255,0,0]
-
-	#win.set_image(im)
-	#time.sleep(7)
-
 	return fh_circle, fh_M, fh_square
 
 
@@ -174,14 +165,6 @@ def forhead_height(pose, image, scale, im):
 	height = forhead[1].length
 	wide = clamp((height - 14) * 3, 0, 100)
 	narrow = 100 - wide
-
-	#win = dlib.image_window()
-	#im[round(forhead[0].y),round(forhead[0].x)]=[255,0,0]
-	#im[round(forhead[1].y),round(forhead[1].x)]=[255,0,0]
-	#im[round(forhead[2].y),round(forhead[2].x)]=[255,0,0]
-
-	#win.set_image(im)
-	#time.sleep(7)
 
 	return forhead[1].length, narrow
 
@@ -263,14 +246,8 @@ def ear_size(pose, image, scale, im):
 	if length == 0:
 		#return "Фотография неправильного формата", "Фотография неправильного формата"
 		return -1,-1
-	'''
-	win = dlib.image_window()
-	im[round(ear[0].y),round(ear[0].x)]=[255,0,0]
-	im[round(ear[1].y),round(ear[1].x)]=[255,0,0]
 
-	win.set_image(im)
-	time.sleep(7)
-	'''
+	
 	img = rgb2gray(im)
 
 	dir_ = point_direction(pose.part(0).x, pose.part(0).y, pose.part(3).x, pose.part(3).y) * (np.pi/180)
@@ -294,7 +271,7 @@ def ear_size(pose, image, scale, im):
 
 	init = np.vstack((init1, init2))
 	#snake = np.vstack((snake1, snake2))
-	'''
+	'''	
 	fig, ax = plt.subplots(figsize=(7, 7))
 	ax.imshow(img, cmap=plt.cm.gray)
 	ax.plot(init[:, 0], init[:, 1], '--r', lw=3)
@@ -302,9 +279,9 @@ def ear_size(pose, image, scale, im):
 	ax.plot(snake2[:, 0], snake2[:, 1], '-b', lw=3)
 	ax.set_xticks([]), ax.set_yticks([])
 	ax.axis([0, img.shape[1], img.shape[0], 0])
+	
+	plt.show()
 	'''
-	#plt.show()
-
 	dir_ = point_direction(pose.part(28).x, pose.part(28).y, pose.part(1).x, pose.part(1).y)
 	lendir_x, lendir_y = lengthDir(scale/100, dir_)
 
@@ -362,7 +339,9 @@ def ear_size(pose, image, scale, im):
 	else:
 		length = length2
 
-	return length, 0
+	length = clamp( length * 3.44, 0, 100)
+
+	return length, 100 - length
 
 
 
@@ -524,3 +503,175 @@ def fat_chin2(predictor_model, file_name, pose, im1):
 
 	return result
 
+
+def forehead_form2(predictor_model,file_name,pose, image, scale):
+	forhead = [0, 0, 0]
+	forhead[0], forhead[1], forhead[2] = add_forehead(pose, image, scale)
+
+	im = Image.open(file_name) # Can be many different formats.
+	pix = im.load()
+
+	ym = max(forhead[0].y, forhead[1].y, forhead[2].y) #max
+	xm = max(forhead[0].x, forhead[1].x, forhead[2].x)
+
+	data=[[],[]]
+
+	x1 = pose.part(17).x
+	y1 = pose.part(17).y
+	x2 = pose.part(26).x
+	y2 = pose.part(26).y
+
+	x3 = pose.part(27).x
+	y3 = pose.part(27).y
+	x4 = pose.part(33).x
+	y4 = pose.part(33).y
+
+	x_val={}
+	min_x=im.size[0]
+	min_y=im.size[1]
+	max_x=0
+	max_y=0
+	x=0
+	while(x<im.size[0]):
+		y=0
+		while(y<im.size[1]):
+			# (x-x1)(y2-y1)=(y-y1	)(x2-x1)
+			if(radical(test_line(x,y,x1,y1,x2,y2,x11=xm,y11=ym),
+			test_line(x,y,x1,y1,x2,y2,x11=pose.part(18).x,y11=pose.part(18).y)) and
+			radical(test_line(x,y,x3,y3,x4,y4,x11=pose.part(17).x,y11=pose.part(26).x),
+			test_line(x,y,x3,y3,x4,y4,x11=pose.part(17).x,y11=pose.part(26).x))):
+
+				color=pix[x,y]
+				if(x>max_x):
+					max_x=x
+				if(y>max_y):
+					max_y=y
+				if(x<min_x):
+					min_x=x
+				if(y<min_y):
+					min_y=y
+				color=round((color[0]+color[1]+color[2])/3)
+				cords=[]
+				cords.append(x)
+				cords.append(y)
+				data[0].append(cords)
+				data[1].append(color)
+			y+=1
+		x+=1
+	max_value=0
+	x=min_x
+
+	print('Area is defined')
+
+	global_max_val=0
+
+	data_edges=[[],[]]
+	while(x<=max_x):
+		y=min_y
+		if((x in x_val) == False): #if((x in x_val) == False) and x>xa and x<xa3:
+			x_val[x]=y
+
+		while(y<=max_y):
+			#print('x',x ,'y',y)
+			cords=[]
+			cords.append(x)
+			cords.append(y)
+			max_delta=0
+			sum_delta=0
+			counter=0
+			if cords in data[0]:
+				if (x in x_val) and (x_val[x]<y):
+					x_val[x]=y
+				if ([cords[0],cords[1]-1] in data[0]):
+					delta=abs(data[1][data[0].index([cords[0],cords[1]-1])]-data[1][data[0].index(cords)])
+					counter+=1
+					sum_delta+=delta
+
+				if [cords[0],cords[1]+1] in data[0]:
+					delta=abs(data[1][data[0].index([cords[0],cords[1]+1])]-data[1][data[0].index(cords)])
+					counter+=1
+					sum_delta+=delta
+
+				if [cords[0]-1,cords[1]] in data[0]:
+					delta=abs(data[1][data[0].index([cords[0]-1,cords[1]])]-data[1][data[0].index(cords)])
+					counter+=1
+					sum_delta+=delta
+
+				if [cords[0]+1,cords[1]] in data[0]:
+					delta=abs(data[1][data[0].index([cords[0]+1,cords[1]])]-data[1][data[0].index(cords)])
+					counter+=1
+					sum_delta+=delta
+
+				if ([cords[0]+1,cords[1]+1] in data[0]):
+					delta=abs(data[1][data[0].index([cords[0]+1,cords[1]+1])]-data[1][data[0].index(cords)])
+					counter+=1
+					sum_delta+=delta
+
+				if ([cords[0]-1,cords[1]+1] in data[0]):
+					delta=abs(data[1][data[0].index([cords[0]-1,cords[1]+1])]-data[1][data[0].index(cords)])
+					counter+=1
+					sum_delta+=delta
+
+				if ([cords[0]+1,cords[1]-1] in data[0]):
+					delta=abs(data[1][data[0].index([cords[0]+1,cords[1]-1])]-data[1][data[0].index(cords)])
+					counter+=1
+					sum_delta+=delta
+
+				if ([cords[0]-1,cords[1]-1] in data[0]):
+					delta=abs(data[1][data[0].index([cords[0]-1,cords[1]-1])]-data[1][data[0].index(cords)])
+					counter+=1
+					sum_delta+=delta
+
+				data_edges[0].append(cords)
+				#max_delta=max_delta*4
+				max_delta=round(sum_delta/counter)
+				if(max_delta>255):
+					max_delta=255
+
+				if(max_delta>max_value):
+					max_value=max_delta
+
+				if global_max_val<max_value:
+					global_max_val=max_value
+				data_edges[1].append(max_delta)
+					#print(cords,max_delta)
+
+			y+=1
+
+		x+=1
+
+	print('Edges are defined')
+
+	color_list = []
+	x_list=[]
+
+	for i in range(0,global_max_val+1):
+		color_list.append(0)
+
+	for i in range(0,global_max_val+1):
+		x_list.append(i)
+
+	x=min_x
+	while(x<=max_x):
+		y=min_y
+		while(y<=max_y):
+			cords=[]
+			cords.append(x)
+			cords.append(y)
+			max_delta=0
+			if cords in data_edges[0]:
+				color=data_edges[1][data_edges[0].index(cords)]
+				if(color>=round(max_value*0.25)):
+					data_edges[1][data_edges[0].index(cords)]=255
+					pix[x,y]=(255,255,255)
+				else:
+					data_edges[1][data_edges[0].index(cords)]=0
+					pix[x,y]=(0,0,0)
+
+			y+=1
+
+		x+=1
+
+	im.save(file_name.replace(".jpg", "_line.png"))
+
+	return 1, 1, 1
