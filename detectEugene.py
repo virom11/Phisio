@@ -696,7 +696,6 @@ def forehead_form2(predictor_model,file_name,pose, image, scale):
 				color=data_edges[1][data_edges[0].index(cords)]
 				if(color>=round(max_value*0.25)):
 					data_edges[1][data_edges[0].index(cords)]=255
-					print('Code is working')
 					pix[x,y]=(255,255,255)
 				else:
 					data_edges[1][data_edges[0].index(cords)]=0
