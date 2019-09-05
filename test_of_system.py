@@ -222,11 +222,11 @@ def analyzer(control_string,dir,file_num):
                     elif(control_string == "Семейный: "):
                         a, b, main = detectEugene.worlds(pose_landmarks, image1, prop)
                     elif(control_string == "Волосы лба Полукругом: "):
-                        main, a, b  = detectEugene.forhead_form(pose_landmarks, image1, prop, image)
+                        main, a, b  = detectEugene.forehead_form2(predictor_model, file_name, pose_landmarks, image1, prop)
                     elif(control_string == "Буквой М: "):
-                        a, main, b = detectEugene.forhead_form(pose_landmarks, image1, prop, image)
+                        a, main, b = detectEugene.forehead_form2(predictor_model, file_name, pose_landmarks, image1, prop)
                     elif(control_string == "Квадратный: "):
-                        a, b, main = detectEugene.forhead_form(pose_landmarks, image1, prop, image)
+                        a, b, main = detectEugene.forehead_form2(predictor_model, file_name, pose_landmarks, image1, prop)
                     elif(control_string == "Горбинка на носу: "):
                         main = detectVector.hump_nose(predictor_model, file_name,pose_landmarks)
                     elif(control_string == "Скулы выше уровня глаз: "):
@@ -337,7 +337,7 @@ def analyzer(control_string,dir,file_num):
                     elif(control_string == "Огонь на: "):
                         a,b,main = detectEugene.face_form(pose_landmarks, image1, prop)
                     elif(control_string == "Лопоухий: "):
-                        main, a = detectEugene.ear_size(pose_landmarks, image1, prop)
+                        main, a = detectEugene.ear_size(pose_landmarks, image1, prop, image)
                     elif(control_string == "Прижатые уши: "):
                         a, main = detectEugene.ear_size(pose_landmarks, image1, prop)
 

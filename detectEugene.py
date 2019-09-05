@@ -535,12 +535,44 @@ def forehead_form2(predictor_model,file_name,pose, image, scale):
 	while(x<im.size[0]):
 		y=0
 		while(y<im.size[1]):
-			# (x-x1)(y2-y1)=(y-y1	)(x2-x1)
+			'''
+			#Этот код я написал для того, чтобы нарисовать область на изображении, чтобы понять все ли сделано верно.
+			#Пригодится в будущем, чтобы повторно использовать мой офигенный говнокод 
+			# (x-x1)(y2-y1)=(y-y1)(x2-x1)
+			x_choto = x
+			y_choto = ((x-pose.part(18).x)*(y2-y1) + pose.part(18).y*(x2-x1))/(x2-x1)
+			#print(x_choto, im.size[0])
+			#print(y_choto, im.size[1])
+			if(x_choto > 0 and x_choto < im.size[0] and y_choto < im.size[1] and y_choto > 0):
+				pix[x_choto,y_choto]=(255,255,255)
+
+			x_choto = x
+			y_choto = ((x-xm)*(y2-y1) + ym*(x2-x1))/(x2-x1)
+			#print(x_choto, im.size[0])
+			#print(y_choto, im.size[1])
+			if(x_choto > 0 and x_choto < im.size[0] and y_choto < im.size[1] and y_choto > 0):
+				pix[x_choto,y_choto]=(255,255,255)
+
+			x_choto = x
+			y_choto = ((x-pose.part(17).x)*(y4-y3) + pose.part(17).y*(x4-x3))/(x4-x3)
+			#print(x_choto, im.size[0])
+			#print(y_choto, im.size[1])
+			if(x_choto > 0 and x_choto < im.size[0] and y_choto < im.size[1] and y_choto > 0):
+				pix[x_choto,y_choto]=(255,255,255)
+				
+			x_choto = x
+			y_choto = ((x-pose.part(26).x)*(y4-y3) + pose.part(26).y*(x4-x3))/(x4-x3)
+			#print(x_choto, im.size[0])
+			#print(y_choto, im.size[1])
+			if(x_choto > 0 and x_choto < im.size[0] and y_choto < im.size[1] and y_choto > 0):
+				pix[x_choto,y_choto]=(255,255,255)
+			'''
+
 			if(radical(test_line(x,y,x1,y1,x2,y2,x11=xm,y11=ym),
 			test_line(x,y,x1,y1,x2,y2,x11=pose.part(18).x,y11=pose.part(18).y)) and
-			radical(test_line(x,y,x3,y3,x4,y4,x11=pose.part(17).x,y11=pose.part(26).x),
-			test_line(x,y,x3,y3,x4,y4,x11=pose.part(17).x,y11=pose.part(26).x))):
-
+			radical(test_line(x,y,x3,y3,x4,y4,x11=pose.part(17).x,y11=pose.part(17).x),
+			test_line(x,y,x3,y3,x4,y4,x11=pose.part(26).x,y11=pose.part(26).x))):
+				print(x,y)
 				color=pix[x,y]
 				if(x>max_x):
 					max_x=x
@@ -640,6 +672,7 @@ def forehead_form2(predictor_model,file_name,pose, image, scale):
 
 		x+=1
 
+	print(data_edges)
 	print('Edges are defined')
 
 	color_list = []
@@ -663,6 +696,7 @@ def forehead_form2(predictor_model,file_name,pose, image, scale):
 				color=data_edges[1][data_edges[0].index(cords)]
 				if(color>=round(max_value*0.25)):
 					data_edges[1][data_edges[0].index(cords)]=255
+					print('Code is working')
 					pix[x,y]=(255,255,255)
 				else:
 					data_edges[1][data_edges[0].index(cords)]=0

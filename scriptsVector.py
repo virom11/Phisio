@@ -75,11 +75,14 @@ def graf(x_data=[],y_data=[], title=None, save = False, file_name='Empty_name', 
     fig, ax = plt.subplots()
     ax.plot(x_data, y_data)
 
+    #plt.show()
+
     if(title!=None):
         ax.set_title(title)
 
-    if((save==1) and (file_name!='Empty_name')):
+    if((save==True) and (file_name!='Empty_name')):
         fig.savefig(file_name.replace(".jpg", str(new_filename)+".jpg"))
+        print('Graf was saved')
 
 def image_size_printer(im):
     print('Image Size: '+str(im.size))

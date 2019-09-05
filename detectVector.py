@@ -94,6 +94,227 @@ def nose_size(predictor_model,file_name,pose_landmarks):
     big = 0
     small = 0
     tip=0
+
+    if (pose_landmarks.part(33).x > pose_landmarks.part(34).x) or (pose_landmarks.part(33).x < pose_landmarks.part(32).x):
+        return -1 -1 -1 
+        print('Incorrect photo.')
+    else:
+        im = Image.open(file_name) # Can be many different formats.
+        pix = im.load()
+
+        ym=pose_landmarks.part(29).y
+        xm=pose_landmarks.part(29).x
+            
+        data=[[],[]]
+
+        x31=pose_landmarks.part(31).x
+        y31=pose_landmarks.part(31).y
+        x35=pose_landmarks.part(35).x
+        y35=pose_landmarks.part(35).y
+        x33=pose_landmarks.part(33).x
+        y33=pose_landmarks.part(33).y
+        x27=pose_landmarks.part(27).x
+        y27=pose_landmarks.part(27).y
+
+        x41=pose_landmarks.part(40).x
+        y41=pose_landmarks.part(40).y
+        x46=pose_landmarks.part(47).x
+        y46=pose_landmarks.part(47).y
+
+        
+        #sum=0
+        #counter=0
+        x_val={}
+        min_x=im.size[0]
+        min_y=im.size[1]
+        max_x=0
+        max_y=0
+        x=0
+        while(x<im.size[0]):
+
+            y=0
+            while(y<im.size[1]):
+
+                if(scriptsVector.radical(scriptsVector.test_line(x,y,x31,y31,x35,y35,x11=x33,y11=y33),
+                                        scriptsVector.test_line(x,y,x31,y31,x35,y35,x11=xm,y11=ym)) and
+                scriptsVector.radical(scriptsVector.test_line(x,y,x33,y33,x27,y27,x11=x41,y11=y41),
+                                        scriptsVector.test_line(x,y,x33,y33,x27,y27,x11=x46,y11=y46))):                    
+                        
+                        color=pix[x,y]
+                        if(x>max_x):
+                            max_x=x
+                        if(y>max_y):
+                            max_y=y
+                        if(x<min_x):
+                            min_x=x
+                        if(y<min_y):
+                            min_y=y
+                        color=round((color[0]+color[1]+color[2])/3)
+                        cords=[]
+                        cords.append(x)
+                        cords.append(y)
+                        data[0].append(cords)
+                        data[1].append(color)
+                y+=1
+            x+=1
+        max_value=0
+        x=min_x
+
+        print('Area is defined')
+
+        global_max_val=0
+        
+        data_edges=[[],[]]
+        while(x<=max_x):
+            y=min_y
+            if((x in x_val) == False):  #if((x in x_val) == False) and x>xa and x<xa3:
+                x_val[x]=y
+
+            while(y<=max_y):            
+                #print('x',x ,'y',y)
+                cords=[]
+                cords.append(x)
+                cords.append(y)
+                max_delta=0
+                sum_delta=0
+                counter=0
+                if cords in data[0]:
+                    if (x in x_val) and (x_val[x]<y):
+                            x_val[x]=y
+                    if ([cords[0],cords[1]-1] in data[0]):
+                        delta=abs(data[1][data[0].index([cords[0],cords[1]-1])]-data[1][data[0].index(cords)])
+                        counter+=1
+                        sum_delta+=delta
+
+                    if [cords[0],cords[1]+1] in data[0]:
+                        delta=abs(data[1][data[0].index([cords[0],cords[1]+1])]-data[1][data[0].index(cords)])
+                        counter+=1
+                        sum_delta+=delta
+
+                    if [cords[0]-1,cords[1]] in data[0]:
+                        delta=abs(data[1][data[0].index([cords[0]-1,cords[1]])]-data[1][data[0].index(cords)])
+                        counter+=1
+                        sum_delta+=delta
+
+                    if [cords[0]+1,cords[1]] in data[0]:
+                        delta=abs(data[1][data[0].index([cords[0]+1,cords[1]])]-data[1][data[0].index(cords)])
+                        counter+=1
+                        sum_delta+=delta
+
+                    if ([cords[0]+1,cords[1]+1] in data[0]):
+                        delta=abs(data[1][data[0].index([cords[0]+1,cords[1]+1])]-data[1][data[0].index(cords)])
+                        counter+=1
+                        sum_delta+=delta
+
+                    if ([cords[0]-1,cords[1]+1] in data[0]):
+                        delta=abs(data[1][data[0].index([cords[0]-1,cords[1]+1])]-data[1][data[0].index(cords)])
+                        counter+=1
+                        sum_delta+=delta
+
+                    if ([cords[0]+1,cords[1]-1] in data[0]):
+                        delta=abs(data[1][data[0].index([cords[0]+1,cords[1]-1])]-data[1][data[0].index(cords)])
+                        counter+=1
+                        sum_delta+=delta
+
+                    if ([cords[0]-1,cords[1]-1] in data[0]):
+                        delta=abs(data[1][data[0].index([cords[0]-1,cords[1]-1])]-data[1][data[0].index(cords)])
+                        counter+=1
+                        sum_delta+=delta
+                    
+                    data_edges[0].append(cords)
+                    #max_delta=max_delta*4
+                    max_delta=round(sum_delta/counter)
+                    if(max_delta>255):
+                        max_delta=255
+                    
+                    if(max_delta>max_value):
+                        max_value=max_delta
+                        if global_max_val<max_value:
+                            global_max_val=max_value
+                    data_edges[1].append(max_delta)
+                    #print(cords,max_delta)
+                    
+                y+=1
+
+            x+=1
+
+        print('Edges are defined')
+
+        color_list = []
+        x_list=[]
+
+        for i in range(0,global_max_val+1):
+            color_list.append(0)
+
+        for i in range(0,global_max_val+1):
+            x_list.append(i)
+
+        cl = [(0,0,0), (50,50,50), (100,100,100), (150,150,150), (0, 0, 63), (0, 0, 126), (0, 0, 189), (0, 0, 255), (0, 63, 0), (0, 126, 0), (0, 189, 0), (0, 255, 0), (63, 63, 0), (126, 126, 0), (189, 189, 0), (255, 255, 0), (63, 0, 0), (126, 0, 0), (189, 0, 0), (255, 0, 0)]
+
+        x=min_x
+        while(x<=max_x):
+            y=min_y
+            while(y<=max_y):
+                cords=[]
+                cords.append(x)
+                cords.append(y)
+                max_delta=0
+                if cords in data_edges[0]:
+                    color=data_edges[1][data_edges[0].index(cords)]
+                    color_list[color] += 1
+                    if(color <= 19):
+                        pix[x,y]=cl[color]
+                    else: 
+                        pix[x,y]=(255, 255, 255)
+                y+=1
+                '''
+                if cords in data_edges[0]:
+                    color=data_edges[1][data_edges[0].index(cords)]
+                    if(color>=round(max_value*0.25)):
+                        data_edges[1][data_edges[0].index(cords)]=255
+                        pix[x,y]=(255,255,255)
+                    else:
+                        data_edges[1][data_edges[0].index(cords)]=0
+                        pix[x,y]=(0,0,0)
+                y+=1
+ 
+                '''
+            x+=1
+        print(x_list)
+        print(color_list)
+        print('New code')
+
+        fig = plt.figure()
+        # Добавление на рисунок прямоугольной (по умолчанию) области рисования
+        graph1 = plt.plot(x_list[0:3], color_list[0:3], color='blue', label = '< 3')
+        graph1 = plt.plot(x_list[2:7], color_list[2:7], color='green', label = '> 3 & < 7')
+        graph1 = plt.plot(x_list[6:12], color_list[6:12], color='yellow', label = '< 7 & < 12')
+        graph1 = plt.plot(x_list[11:20], color_list[11:20], color='red', label = '> 12')
+      
+        plt.legend()
+        grid1 = plt.grid(True) # линии вспомогательной сетки
+
+        #plt.show()
+        fig.savefig(file_name.replace(".jpg", "_graf.jpg"))
+
+
+        #axes = plt.gca()
+        #axes.set_xlim([xmin,xmax])
+        #axes.set_ylim([ymin,ymax])
+
+        #scriptsVector.graf(x_data = x_list, y_data = color_list, save = True, file_name = file_name, title = file_name, new_filename = '_graf')
+        im.save(file_name.replace(".jpg", "_line.png"))
+
+        print('Picture saved')
+
+        return big,small,tip
+
+
+"""
+def nose_size(predictor_model,file_name,pose_landmarks):
+    big = 0
+    small = 0
+    tip=0
     dist=scriptsVector.distance(pose_landmarks.part(29).x,pose_landmarks.part(29).y,pose_landmarks.part(30).x,pose_landmarks.part(30).y)
     dist_control=scriptsVector.distance(pose_landmarks.part(30).x,pose_landmarks.part(30).y,pose_landmarks.part(33).x,pose_landmarks.part(33).y)
     #print('Distance: '+ str(dist))
@@ -116,6 +337,9 @@ def nose_size(predictor_model,file_name,pose_landmarks):
         tip=100
     
     return big,small,tip
+
+
+"""
 
 def nose_wings(predictor_model,file_name,pose_landmarks):
     nose_wings=0
@@ -757,4 +981,6 @@ def hair_color(predictor_model,file_name,pose_landmarks):
     orange=(abs(255-second_color[0])+abs(second_color[1]-102)+second_color[2])/6.63
 
     return light, dark, orange
+
+
 
