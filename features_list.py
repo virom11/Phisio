@@ -1,4 +1,6 @@
-features_list={"Буквой М: ":"Лоб/Волосы буквой М"}
+features_list={"Уголки губ вверх: " : "Lip_corners/up", 
+"Уголки губ вниз: " : "Lip_corners/down", 
+"Уголки губ прямо: " : "Lip_corners/straight"}
 
 '''
 features_list={"Нос картошкой: ":"Нос/Нос картошкой",

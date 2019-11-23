@@ -44,18 +44,18 @@ for i in range(0, 66):
 
 file_num=0
 
-predictor_model = "/home/vector/Documents/shape_predictor_68_face_landmarks.dat"
+predictor_model = "/home/vector/Documents/models/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
 
 
 #Автоматика для определения ситсемы, на которой запускается код
 if platform == "linux" or platform == "linux2":
-    base="/home/vector/Documents/Проект/"
+    base="/home/vector/Documents/data_bases/"
 #elif platform == "darwin":
     # base=""
 #elif platform == "win32" or platform == "win64":
 #    base=""
 
-play_counter=10000
+play_counter=5000
 
 max = 0
 min = 100
@@ -280,44 +280,20 @@ def analyzer(control_string,dir,file_num):
                     elif(control_string == "Круглый подбородок: "):
                         main = detect.chin_form(pose_landmarks, prop)
                     elif(control_string == "Уголки губ вверх: "):
-                        left =detect.left_lips_ugolki(pose_landmarks, prop)
-                        right = detect.right_lips_ugolki(pose_landmarks, prop)
-                        d=(left+right)/2
-                        if d>0:
-                            var_25=d
-                            var_26=0
-                            if d<20: var_27=100-d*5
-                        if (d<0):
-                            var_25=0
-                            var_26 = d
-                            if d<20: var_27=100-d*5
-                        main = var_25
+                        try:
+                            main, a, b = detectVector.lips(predictor_model, file_name)
+                        except:
+                            print('Error!')
                     elif(control_string == "Уголки губ вниз: "):
-                        left =detect.left_lips_ugolki(pose_landmarks, prop)
-                        right = detect.right_lips_ugolki(pose_landmarks, prop)
-                        d=(left+right)/2
-                        if d>0:
-                            var_25=d
-                            var_26=0
-                            if d<20: var_27=100-d*5
-                        if (d<0):
-                            var_25=0
-                            var_26 = d
-                            if d<20: var_27=100-d*5
-                        main = var_26
+                        try:
+                            a,main, b = detectVector.lips(predictor_model, file_name)
+                        except:
+                            print('Error!')
                     elif(control_string == "Уголки губ прямо: "):
-                        left =detect.left_lips_ugolki(pose_landmarks, prop)
-                        right = detect.right_lips_ugolki(pose_landmarks, prop)
-                        d=(left+right)/2
-                        if d>0:
-                            var_25=d
-                            var_26=0
-                            if d<20: var_27=100-d*5
-                        if (d<0):
-                            var_25=0
-                            var_26 = d
-                            if d<20: var_27=100-d*5
-                        main = var_27
+                        try:
+                            a, b, main = detectVector.lips(predictor_model, file_name)
+                        except:
+                            print('Error!')
                     elif(control_string == "Сросшиеся брови: "):
                         main = detect.eyebrows_accreted(pose_landmarks, image1)
                     elif(control_string == "Веки закрытые внутри: "):
@@ -340,9 +316,6 @@ def analyzer(control_string,dir,file_num):
                         main, a = detectEugene.ear_size(pose_landmarks, image1, prop, image)
                     elif(control_string == "Прижатые уши: "):
                         a, main = detectEugene.ear_size(pose_landmarks, image1, prop)
-
-   
-                        
                     worksheet.write(row, 3, control_string)
                     if(main >=0 ):
                         sum=sum+float(main)

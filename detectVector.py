@@ -30,6 +30,8 @@ from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
 import scipy.signal
+from keras.models import load_model
+import tensorflow as tf
 
 
 def asymmetry(predictor_model,file_name):
@@ -983,4 +985,33 @@ def hair_color(predictor_model,file_name,pose_landmarks):
     return light, dark, orange
 
 
+def lips(predictor_model, file_name):
 
+    alignedFace, pose_landmarks = scriptsVector.face_aligner_func_without_save(predictor_model, file_name)
+
+    pose_landmarks = scriptsVector.pose_landmarks_detect_without_save(predictor_model, alignedFace)
+    print(pose_landmarks)
+
+    if(pose_landmarks != 0):
+        mouth_points = []
+
+        for i in range(48,66):
+            mouth_points.append([pose_landmarks.part(i).x, pose_landmarks.part(i).y])
+
+        max_x, max_y = np.amax(mouth_points, axis = 0)
+        min_x, min_y = np.amin(mouth_points, axis = 0)
+        max_x += int((max_x - min_x) * 0.1)
+        min_x -= int((max_x - min_x) * 0.1)
+        max_y += int((max_y - min_y) * 0.2)
+        min_y -= int((max_y - min_y) * 0.2)
+
+        img = scriptsVector.crop(alignedFace, [min_x, min_y, max_x, max_y])
+        res = cv2.resize(img, dsize=(400, 200), interpolation=cv2.INTER_CUBIC)
+        im = Image.fromarray(res)
+
+        image = np.array([res], dtype = float)
+        model = tf.keras.models.load_model('mouth (3).h5')
+        prediction = model.predict(image)
+        classes = ['up','down','straight']
+
+        return [int(i * 100) for i in prediction[0]]

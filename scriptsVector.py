@@ -36,11 +36,11 @@ import scipy
 import scipy.misc
 import scipy.cluster
 
-def face_aligner_func(predictor_path,face_file_path):
-
-    face_detector=dlib.get_frontal_face_detector()
-    face_pose_predictor=dlib.shape_predictor(predictor_path)
-    face_aligner=openface.AlignDlib(predictor_path)
+def face_aligner_func(predictor_path, face_file_path, path_for_save, filename):
+    pose_landmarks = 0
+    face_detector = dlib.get_frontal_face_detector()
+    face_pose_predictor = dlib.shape_predictor(predictor_path)
+    face_aligner = openface.AlignDlib(predictor_path)
     image = cv2.imread(face_file_path)
 
     detected_faces=face_detector(image,1)
@@ -48,12 +48,85 @@ def face_aligner_func(predictor_path,face_file_path):
 
     for i, face_rect in enumerate(detected_faces):
         #print('-Face# {} found at Left: {} Top:{} Right:{} Bottom: {} '.format(i, face_rect.left(), face_rect.top(), face_rect.right(), face_rect.bottom()))
-        pose_landmarks=face_pose_predictor(image,face_rect)
-        alignedFace=face_aligner.align(1000,image,face_rect,landmarkIndices=openface.AlignDlib.OUTER_EYES_AND_NOSE)
-        cv2.imwrite(face_file_path.replace(".jpg","_aligned.jpg"),alignedFace)
+        #pose_landmarks = face_pose_predictor(image,face_rect)
+        alignedFace = face_aligner.align(1000, image, face_rect, landmarkIndices=openface.AlignDlib.OUTER_EYES_AND_NOSE)
         pose_landmarks = face_pose_predictor(alignedFace, face_rect)
+        if path_for_save != None:
+            try:
+                os.stat(path_for_save)
+                cv2.imwrite(path_for_save + filename, alignedFace)
+            except FileNotFoundError:
+                os.mkdir(path_for_save) 
+                cv2.imwrite(path_for_save + filename, alignedFace)
+        
 
     return pose_landmarks
+
+def face_aligner_func_without_save(predictor_path, face_file_path):
+    pose_landmarks = 0
+    face_detector = dlib.get_frontal_face_detector()
+    face_pose_predictor = dlib.shape_predictor(predictor_path)
+    face_aligner = openface.AlignDlib(predictor_path)
+    image = cv2.imread(face_file_path)
+
+    detected_faces = face_detector(image,1)
+    #print('Found {} faces.'.format(len(detected_faces)))
+
+    for i, face_rect in enumerate(detected_faces):
+        #print('-Face# {} found at Left: {} Top:{} Right:{} Bottom: {} '.format(i, face_rect.left(), face_rect.top(), face_rect.right(), face_rect.bottom()))
+        #pose_landmarks = face_pose_predictor(image,face_rect)
+        alignedFace = face_aligner.align(1000, image, face_rect, landmarkIndices=openface.AlignDlib.OUTER_EYES_AND_NOSE)
+        pose_landmarks = face_pose_predictor(alignedFace, face_rect)
+        if(face_file_path.endswith('.png')):
+            cv2.imwrite(face_file_path.replace('.png', '_.png'), alignedFace)
+            alignedFace = io.imread(face_file_path.replace('.png', '_.png'))
+            os.remove(face_file_path.replace('.png', '_.png'))
+        elif(face_file_path.endswith('.jpg')):
+            cv2.imwrite(face_file_path.replace('.jpg', '_.jpg'), alignedFace)
+            alignedFace = io.imread(face_file_path.replace('.jpg', '_.jpg'))
+            os.remove(face_file_path.replace('.jpg', '_.jpg'))
+        elif(face_file_path.endswith('.jpeg')):
+            cv2.imwrite(face_file_path.replace('.jpeg', '_.jpeg'), alignedFace)
+            alignedFace = io.imread(face_file_path.replace('.jpeg', '_.jpeg'))
+            os.remove(face_file_path.replace('.jpeg', '_.jpeg'))
+
+        return alignedFace, pose_landmarks
+
+def crop(img, cords):
+    #cv2.imshow("aligned", img)
+    crop_img = img[cords[1]:cords[3], cords[0]:cords[2]]
+    #cv2.imshow("cropped", crop_img)
+    return crop_img
+
+def pose_landmarks_detect_without_save(predictor_model, img):
+    pose_landmarks = 0
+    detected_faces = 0
+    try:
+        face_detector = dlib.get_frontal_face_detector()
+        image1 = img
+        image = img
+        face_pose_predictor = dlib.shape_predictor(predictor_model)
+        detected_faces = face_detector(image, 1) 
+
+        if len(detected_faces) == 0 or len(detected_faces) > 1:
+            print("Лица на фото не обнаружено")
+            pose_landmarks = 0
+
+        if len(detected_faces) > 1:
+            print("Обнаружено более одного лица")
+
+        if len(detected_faces) == 1:
+            pose_landmarks = []
+
+        if len(detected_faces) == 1: # Если лицо одно, то продолжаем
+            for i, face_rect in enumerate(detected_faces):
+                pose_landmarks = face_pose_predictor(image, face_rect)
+
+    except RuntimeError:
+        pose_landmarks = 0
+
+    return pose_landmarks
+
 
 def distance(x1,y1,x2,y2):
     dist=math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1))

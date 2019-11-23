@@ -6,7 +6,7 @@ import sys
 import dlib
 import detect
 import detectEugene
-#import detectVector
+import detectVector
 import os
 #import openface
 import imageio
@@ -46,9 +46,9 @@ if(ubuntu):
 
 	print('Ubuntu is used now.')
 
-	predictor_model = "/home/vector/Documents/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
+	predictor_model = "/home/vector/Documents/models/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
 	#dir="/home/vector/Documents/Лоб/Прямой лоб"
-	dir="/home/vector/Documents/Проект/Нос/Переносица с впадиной"
+	dir="/home/vector/Documents/data_bases/Lip_corners/down"
 
 else:
 
@@ -188,11 +188,11 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             
             priznak[7], priznak[9] = detectEugene.eyebrows_bold(pose_landmarks, image1)
             print("Брови тёмные, густые:", priznak[9], "Брови светлые, редкие:", priznak[7])
-            '''
+
             #priznak[32], priznak[34], priznak[55] = detectEugene.forhead_form(pose_landmarks, image1, prop) #круг, М, квадрат
             priznak[32], priznak[34], priznak[55] = detectEugene.forehead_form2(predictor_model, file_name, pose_landmarks, image1, prop)
             print("Волосы лба Полукругом: ", priznak[32], " Буквой М: ", priznak[34], "Квадратный: ", priznak[55])
-            '''
+
             priznak[35], priznak[56] = detectEugene.forhead_height(pose_landmarks, image1, prop, image)
             print("Лоб Широкий: ", priznak[35], "Лоб Узкий: ", priznak[56])
             
@@ -235,6 +235,9 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
 
             #priznak[33],priznak[31] = detectVector.forehead(predictor_model, file_name,pose_landmarks)
             #print("Прямой лоб : ", priznak[33],"Выпуклый лоб : ", priznak[31])
+
+            priznak[25],priznak[26], priznak[27] = detectVector.lips(predictor_model, file_name)
+            print("Уголки губ вверх: ", priznak[25], "Уголки губ вниз: ", priznak[26], "Уголки губ прямо: ", priznak[27])
 
             #priznak[15],priznak[13], priznak[14] = detectVector.eyelids(predictor_model, file_name,pose_landmarks)
             #print("Веки, закрытые внутри : ", priznak[15],"Веки, закрытые посередине  : ", priznak[13],"Веки, закрытые снаружи  : ", priznak[14])
