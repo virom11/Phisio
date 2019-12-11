@@ -36,6 +36,7 @@ import scipy
 import scipy.misc
 import scipy.cluster
 
+
 def face_aligner_func(predictor_path, face_file_path, path_for_save, filename):
     pose_landmarks = 0
     face_detector = dlib.get_frontal_face_detector()
@@ -62,51 +63,47 @@ def face_aligner_func(predictor_path, face_file_path, path_for_save, filename):
 
     return pose_landmarks
 
-def face_aligner_func_without_save(predictor_path, face_file_path):
+def face_aligner(predictor_path, image):
+    alignedFace = 0
     pose_landmarks = 0
     face_detector = dlib.get_frontal_face_detector()
     face_pose_predictor = dlib.shape_predictor(predictor_path)
     face_aligner = openface.AlignDlib(predictor_path)
-    image = cv2.imread(face_file_path)
 
-    detected_faces = face_detector(image,1)
-    #print('Found {} faces.'.format(len(detected_faces)))
+    detected_faces = face_detector(image, 1)
+    # print('Found {} faces.'.format(len(detected_faces)))
 
     for i, face_rect in enumerate(detected_faces):
-        #print('-Face# {} found at Left: {} Top:{} Right:{} Bottom: {} '.format(i, face_rect.left(), face_rect.top(), face_rect.right(), face_rect.bottom()))
-        #pose_landmarks = face_pose_predictor(image,face_rect)
-        alignedFace = face_aligner.align(1000, image, face_rect, landmarkIndices=openface.AlignDlib.OUTER_EYES_AND_NOSE)
+        # print('-Face# {} found at Left: {} Top:{} Right:{} Bottom: {} '.format(i, face_rect.left(), face_rect.top(), face_rect.right(), face_rect.bottom()))
+        # pose_landmarks = face_pose_predictor(image,face_rect)
+        alignedFace = face_aligner.align(
+            1000, image, face_rect, landmarkIndices=openface.AlignDlib.OUTER_EYES_AND_NOSE)
         pose_landmarks = face_pose_predictor(alignedFace, face_rect)
-        if(face_file_path.endswith('.png')):
-            cv2.imwrite(face_file_path.replace('.png', '_.png'), alignedFace)
-            alignedFace = io.imread(face_file_path.replace('.png', '_.png'))
-            os.remove(face_file_path.replace('.png', '_.png'))
-        elif(face_file_path.endswith('.jpg')):
-            cv2.imwrite(face_file_path.replace('.jpg', '_.jpg'), alignedFace)
-            alignedFace = io.imread(face_file_path.replace('.jpg', '_.jpg'))
-            os.remove(face_file_path.replace('.jpg', '_.jpg'))
-        elif(face_file_path.endswith('.jpeg')):
-            cv2.imwrite(face_file_path.replace('.jpeg', '_.jpeg'), alignedFace)
-            alignedFace = io.imread(face_file_path.replace('.jpeg', '_.jpeg'))
-            os.remove(face_file_path.replace('.jpeg', '_.jpeg'))
 
-        return alignedFace, pose_landmarks
+    return alignedFace
+
 
 def crop(img, cords):
-    #cv2.imshow("aligned", img)
+    # cv2.imshow("aligned", img)
     crop_img = img[cords[1]:cords[3], cords[0]:cords[2]]
-    #cv2.imshow("cropped", crop_img)
+    # cv2.imshow("cropped", crop_img)
+    cv2.waitKey(1)
     return crop_img
 
-def pose_landmarks_detect_without_save(predictor_model, img):
+
+def resize_image(image, size):
+    res = cv2.resize(image, dsize=(
+        size[0], size[1]), interpolation=cv2.INTER_CUBIC)
+    return res
+
+
+def pose_landmarks_detect(predictor_model, image):
     pose_landmarks = 0
     detected_faces = 0
     try:
         face_detector = dlib.get_frontal_face_detector()
-        image1 = img
-        image = img
         face_pose_predictor = dlib.shape_predictor(predictor_model)
-        detected_faces = face_detector(image, 1) 
+        detected_faces = face_detector(image, 1)
 
         if len(detected_faces) == 0 or len(detected_faces) > 1:
             print("Лица на фото не обнаружено")
@@ -118,7 +115,7 @@ def pose_landmarks_detect_without_save(predictor_model, img):
         if len(detected_faces) == 1:
             pose_landmarks = []
 
-        if len(detected_faces) == 1: # Если лицо одно, то продолжаем
+        if len(detected_faces) == 1:  # Если лицо одно, то продолжаем
             for i, face_rect in enumerate(detected_faces):
                 pose_landmarks = face_pose_predictor(image, face_rect)
 

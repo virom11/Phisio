@@ -118,7 +118,7 @@ error = 0
 
 all_photoes = 0
 for filenames in os.listdir(dir):
-    if(filenames == 'Вверх'):
+    if(filenames == 'Прямо'):
         for filename in os.listdir(dir + "/" + filenames):
             all_photoes += 1
 
@@ -132,7 +132,7 @@ for filenames in os.listdir(dir):
         counter[1] += 1
         counter[0] += 1
         work_counter += 1
-        if(filenames == 'Вверх'):
+        if(filenames == 'Прямо'):
             # переход по всем изображениям в папке
             end_time = datetime.now()
             file_name = dir + '/' + filenames + '/' + filename
@@ -227,8 +227,8 @@ for filenames in os.listdir(dir):
 
 
 
-np.save('/home/vector/Documents/models/images3.npy', images)
-np.save('/home/vector/Documents/models/y3.npy', y)
+np.save('/home/vector/Documents/models/images2.npy', images)
+np.save('/home/vector/Documents/models/y2.npy', y)
 
 
 '''
