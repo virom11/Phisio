@@ -32,7 +32,7 @@ start_time = datetime.now()
 # Модель определения 68 точек на лице
 predictor_model = "/home/vector/Documents/models/shape_predictor_68_face_landmarks.dat"
 
-dir = '/home/vector/Documents/data_bases/Nose/process0'
+dir = '/home/vector/Documents/data_bases/Nose/process2'
 
 def config():
     photoes = []
@@ -209,7 +209,6 @@ def data_separator(amount, classes):
         lst_temp = lst2[start:stop]
         for f in lst_temp:
             shutil.copyfile(dir + "/" + classes[1] + '/' + f, '/home/vector/Documents/data_bases/Nose/process' + str(i) + '/' + str(classes[1]) + '/' + f)
-
 def data_creator(work_list):
     images = []  # массив изображений
     y = []  # массив классов изображений

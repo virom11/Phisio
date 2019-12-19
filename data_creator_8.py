@@ -32,7 +32,7 @@ start_time = datetime.now()
 # Модель определения 68 точек на лице
 predictor_model = "/home/vector/Documents/models/shape_predictor_68_face_landmarks.dat"
 
-dir = '/home/vector/Documents/data_bases/Nose/process0'
+dir = '/home/vector/Documents/data_bases/Nose/process3'
 
 def config():
     photoes = []
@@ -335,4 +335,4 @@ def data_creator(work_list):
         np.save('/home/vector/Documents/models/images' + ''.join(choice(ascii_letters) for i in range(20)) + '.npy', images)
         np.save('/home/vector/Documents/models/y' + ''.join(choice(ascii_letters) for i in range(20)) + '.npy', y)
 
-data_creator([classes[0]])
+data_creator([classes[1]])
