@@ -34,6 +34,7 @@ from colormath.color_diff import delta_e_cie2000
 import scipy.signal
 from keras.models import load_model
 import tensorflow as tf
+from PIL import Image
 
 
 
@@ -1066,8 +1067,14 @@ def lips(predictor_model, file_name, path):
     
 
 def nose_size(predictor_model, file_name, path):
+
     try:
-        image = io.imread(file_name)
+        if(file_name.endswith('.webp')):
+            image = Image.open.convert("RGB")
+        else:
+
+            image = io.imread(file_name)
+
         image = scriptsVector.face_aligner(predictor_model, image)
         pose_landmarks = 0
         pose_landmarks = scriptsVector.pose_landmarks_detect(predictor_model, image)
@@ -1086,12 +1093,18 @@ def nose_size(predictor_model, file_name, path):
         max_y += int((max_y - min_y) * 0.4)
         image = scriptsVector.crop(image, [min_x, min_y, max_x, max_y])
         image = scriptsVector.resize_image(image, size=(300, 383))
+        image = image.reshape(1, 300, 383, 3)
+
         #plt.imshow(image, cmap=plt.cm.binary)
         #plt.show()
 
         model = tf.keras.models.load_model(path)
-        prediction = model.predict(image)
-        return [int(i * 100) for i in prediction[0]], 0
+        prediction = model.predict(image.astype('float16'))
+        ans = [int(i * 100) for i in prediction[0]]
+        ans.append(0)
+        print(ans)
+
+        return ans
     except:
         print('Ошибка:\n', traceback.format_exc())
         return ['Err', 'Err', 'Err']
