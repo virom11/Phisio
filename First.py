@@ -17,6 +17,8 @@ import numpy as np
 import math
 from sys import platform
 
+from keras.models import load_model
+import tensorflow as tf
 
 #Автоматика для определения ситсемы, на которой запускается код
 if platform == "linux" or platform == "linux2":
@@ -49,6 +51,9 @@ if(ubuntu):
     predictor_model = "/home/vector/Documents/models/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
     #dir = "/home/vector/Documents/data_bases/Уголки губ/Вниз"
     dir = '/home/vector/Documents/data_bases/Нос/Картошкой'
+    
+    nose_model = tf.keras.models.load_model(nose_model_path)
+    lips_model = tf.keras.models.load_model(lips_model_path)
     
 else:
 
@@ -226,8 +231,8 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             #priznak[62], priznak[39] = detectVector.nose(predictor_model, file_name,pose_landmarks)
             #print("Прямой нос: ", priznak[62], "Переносица с впадиной: ", priznak[39])
 
-            priznak[36], priznak[37],priznak[60] = detectVector.nose_size(predictor_model, file_name, nose_model_path)
-            print("Нос картошкой: ", priznak[36], "Курносый нос: ", priznak[37], "Кончик носа вниз: ", priznak[60])
+            #priznak[36], priznak[37],priznak[60] = detectVector.nose_size(predictor_model, file_name, model)
+            #print("Нос картошкой: ", priznak[36], "Курносый нос: ", priznak[37], "Кончик носа вниз: ", priznak[60])
 
             #priznak[61] = detectVector.nose_wings(predictor_model, file_name,pose_landmarks)
             #print("Крылья носа очерчены: ", priznak[61])
@@ -238,8 +243,8 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             #priznak[33],priznak[31] = detectVector.forehead(predictor_model, file_name,pose_landmarks)
             #print("Прямой лоб : ", priznak[33],"Выпуклый лоб : ", priznak[31])
 
-            #priznak[25],priznak[26], priznak[27] = detectVector.lips(predictor_model, file_name, lips_model_path)
-            #print("Уголки губ вверх: ", priznak[25], "Уголки губ вниз: ", priznak[26], "Уголки губ прямо: ", priznak[27])
+            priznak[25],priznak[26], priznak[27] = detectVector.lips(predictor_model, file_name, lips_model)
+            print("Уголки губ вверх: ", priznak[25], "Уголки губ вниз: ", priznak[26], "Уголки губ прямо: ", priznak[27])
 
             #priznak[15],priznak[13], priznak[14] = detectVector.eyelids(predictor_model, file_name,pose_landmarks)
             #print("Веки, закрытые внутри : ", priznak[15],"Веки, закрытые посередине  : ", priznak[13],"Веки, закрытые снаружи  : ", priznak[14])

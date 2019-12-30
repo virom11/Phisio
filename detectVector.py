@@ -1029,7 +1029,7 @@ def hair_color(predictor_model, file_name, pose_landmarks):
     return light, dark, orange
 
 
-def lips(predictor_model, file_name, path):
+def lips(predictor_model, file_name, model):
     try:
         image = io.imread(file_name)
         image = scriptsVector.face_aligner(predictor_model, image)
@@ -1055,18 +1055,15 @@ def lips(predictor_model, file_name, path):
         #plt.imshow(image, cmap=plt.cm.binary)
         #plt.show()
 
-        model = tf.keras.models.load_model(path)
         prediction = model.predict(image.astype('float16'))
-
-
         #classes = ['up','down','straight']
-        return [int(i * 100) for i in prediction[0]]
+        return [i * 100 for i in prediction[0]]
     except:
         print('Ошибка:\n', traceback.format_exc())
         return ['Err', 'Err', 'Err']
     
 
-def nose_size(predictor_model, file_name, path):
+def nose_size(predictor_model, file_name, path, model):
 
     try:
         if(file_name.endswith('.webp')):
@@ -1098,9 +1095,9 @@ def nose_size(predictor_model, file_name, path):
         #plt.imshow(image, cmap=plt.cm.binary)
         #plt.show()
 
-        model = tf.keras.models.load_model(path)
+
         prediction = model.predict(image.astype('float16'))
-        ans = [int(i * 100) for i in prediction[0]]
+        ans = [i * 100 for i in prediction[0]]
         ans.append(0)
         print(ans)
 
