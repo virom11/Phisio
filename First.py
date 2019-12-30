@@ -17,6 +17,7 @@ import numpy as np
 import math
 from sys import platform
 
+
 #Автоматика для определения ситсемы, на которой запускается код
 if platform == "linux" or platform == "linux2":
     ubuntu = True
@@ -38,22 +39,22 @@ average6 = 0
 average7 = 0
 count_ = 0
 
-
 max = 0
 min = 100
 
 if(ubuntu):
-
-	print('Ubuntu is used now.')
-
-	predictor_model = "/home/vector/Documents/models/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
-	#dir="/home/vector/Documents/Лоб/Прямой лоб"
-	dir="/home/vector/Documents/data_bases/Lip_corners/down"
-
+    nose_model_path = "/home/vector/Documents/GitHub/Phisio/models/nose.h5"
+    lips_model_path = "/home/vector/Documents/GitHub/Phisio/models/lips.h5"
+    print('Ubuntu is used now.')
+    predictor_model = "/home/vector/Documents/models/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
+    dir = "/home/vector/Documents/data_bases/Уголки губ/Вниз"
+    
 else:
 
 	predictor_model = "C:/shape_predictor_68_face_landmarks.dat" # Модель определения 68 точек на лице
 	dir="C:/Dropbox/Студенты/Лоб/Дубровичи"
+    #nose_model_path = 
+    #lips_model_path =  
 
 
 for filename in os.listdir(dir):   # Цикл по всем фоткам этой папки
@@ -224,7 +225,7 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             #priznak[62], priznak[39] = detectVector.nose(predictor_model, file_name,pose_landmarks)
             #print("Прямой нос: ", priznak[62], "Переносица с впадиной: ", priznak[39])
 
-            #priznak[36], priznak[37],priznak[60] = detectVector.nose_size(predictor_model, file_name,pose_landmarks)
+            #priznak[36], priznak[37],priznak[60] = detectVector.nose_size(predictor_model, file_name,pose_landmarks, nose_model_path)
             #print("Нос картошкой: ", priznak[36], "Курносый нос: ", priznak[37], "Кончик носа вниз: ", priznak[60])
 
             #priznak[61] = detectVector.nose_wings(predictor_model, file_name,pose_landmarks)
@@ -236,7 +237,7 @@ for filename in os.listdir(dir):   # Цикл по всем фоткам это�
             #priznak[33],priznak[31] = detectVector.forehead(predictor_model, file_name,pose_landmarks)
             #print("Прямой лоб : ", priznak[33],"Выпуклый лоб : ", priznak[31])
 
-            priznak[25],priznak[26], priznak[27] = detectVector.lips(predictor_model, file_name)
+            priznak[25],priznak[26], priznak[27] = detectVector.lips(predictor_model, file_name, lips_model_path)
             print("Уголки губ вверх: ", priznak[25], "Уголки губ вниз: ", priznak[26], "Уголки губ прямо: ", priznak[27])
 
             #priznak[15],priznak[13], priznak[14] = detectVector.eyelids(predictor_model, file_name,pose_landmarks)

@@ -98,7 +98,7 @@ def nose(predictor_model, file_name, pose_landmarks):
     unstraight = 100-straight
     return straight, unstraight
 
-
+"""
 def nose_size(predictor_model, file_name, pose_landmarks):
     big = 0
     small = 0
@@ -331,7 +331,7 @@ def nose_size(predictor_model, file_name, pose_landmarks):
         return big, small, tip
 
 
-"""
+
 def nose_size(predictor_model,file_name,pose_landmarks):
     big = 0
     small = 0
@@ -1028,7 +1028,7 @@ def hair_color(predictor_model, file_name, pose_landmarks):
     return light, dark, orange
 
 
-def lips(predictor_model, file_name):
+def lips(predictor_model, file_name, path):
     try:
         image = io.imread(file_name)
         image = scriptsVector.face_aligner(predictor_model, image)
@@ -1049,12 +1049,13 @@ def lips(predictor_model, file_name):
         max_y += int((max_y - min_y) * 0.1)
         min_y -= int((max_y - min_y) * 0.1)
         image = scriptsVector.crop(image, [min_x, min_y, max_x, max_y])
-        image = scriptsVector.resize_image(image, size=(100, 100))
+        image = scriptsVector.resize_image(image, size=(120, 120))
+        image = image.reshape(1, 120, 120, 3)
         #plt.imshow(image, cmap=plt.cm.binary)
         #plt.show()
 
-        model = tf.keras.models.load_model('/home/vector/Documents/models/mouth (4).h5')
-        prediction = model.predict(image)
+        model = tf.keras.models.load_model(path)
+        prediction = model.predict(image.astype('float16'))
 
 
         #classes = ['up','down','straight']
@@ -1063,6 +1064,37 @@ def lips(predictor_model, file_name):
         print('Ошибка:\n', traceback.format_exc())
         return ['Err', 'Err', 'Err']
     
+
+def nose_size(predictor_model, file_name, path):
+    try:
+        image = io.imread(file_name)
+        image = scriptsVector.face_aligner(predictor_model, image)
+        pose_landmarks = 0
+        pose_landmarks = scriptsVector.pose_landmarks_detect(predictor_model, image)
+
+        mauth_points = []
+
+        points_list = [28, 33, 31, 35]
+        for i in points_list:
+            mauth_points.append([pose_landmarks.part(i).x, pose_landmarks.part(i).y])
+
+        max_x, max_y = np.amax(mauth_points, axis=0)
+        min_x, min_y = np.amin(mauth_points, axis=0)
+
+        max_x += int((max_x - min_x) * 0.3)
+        min_x -= int((max_x - min_x) * 0.3)
+        max_y += int((max_y - min_y) * 0.4)
+        image = scriptsVector.crop(image, [min_x, min_y, max_x, max_y])
+        image = scriptsVector.resize_image(image, size=(300, 383))
+        #plt.imshow(image, cmap=plt.cm.binary)
+        #plt.show()
+
+        model = tf.keras.models.load_model(path)
+        prediction = model.predict(image)
+        return [int(i * 100) for i in prediction[0]], 0
+    except:
+        print('Ошибка:\n', traceback.format_exc())
+        return ['Err', 'Err', 'Err']
 
 
 """

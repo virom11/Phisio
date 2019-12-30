@@ -32,7 +32,7 @@ start_time = datetime.now()
 # Модель определения 68 точек на лице
 predictor_model = "/home/vector/Documents/models/shape_predictor_68_face_landmarks.dat"
 
-dir = '/home/vector/Documents/data_bases/Nose/process0'
+dir = '/home/vector/Documents/data_bases/Changed/Changed-20191229T201755Z-001/Changed'
 
 def config():
     photoes = []
@@ -40,7 +40,7 @@ def config():
     for folder in os.listdir(dir):
         photoes.append(len(os.listdir(dir + "/" + folder)))
 
-    print('Founded', photoes[0] + photoes[1], 'photoes in directory.')
+    print('Founded', sum(photoes), 'photoes in directory.')
     print('Defined', len(classes), 'classes:')
     print(classes)
 
@@ -89,7 +89,7 @@ def pose_landmarks_detect(predictor_model, image):
 def face_aligner_func(predictor_path, image):
     error = 0
     alignedFace = 0
-    pose_landmarks = 0
+    pose_landmarks = 0 
     face_detector = dlib.get_frontal_face_detector()
     face_pose_predictor = dlib.shape_predictor(predictor_path)
     face_aligner = openface.AlignDlib(predictor_path)
@@ -179,6 +179,8 @@ def data_merge():
 #data_merge()
 photoes, classes = config()
 
+# classes = ['Картошкой', 'Курносый']
+
 def data_separator(amount, classes):    
 
     lst1 = os.listdir(dir + "/" + classes[0])
@@ -210,7 +212,7 @@ def data_separator(amount, classes):
         for f in lst_temp:
             shutil.copyfile(dir + "/" + classes[1] + '/' + f, '/home/vector/Documents/data_bases/Nose/process' + str(i) + '/' + str(classes[1]) + '/' + f)
 
-def data_creator(work_list):
+def data_creator(work_list, detect = False):
     images = []  # массив изображений
     y = []  # массив классов изображений
 
@@ -331,8 +333,89 @@ def data_creator(work_list):
                 print('Amount of errors:', len(errors))
                 print('')
 
+        #some_string = ''.join(choice(ascii_letters) for i in range(20)) + '.npy'
+        if(detect == False):
+            np.save('/home/vector/Documents/models/images_process0', images)
+            np.save('/home/vector/Documents/models/y_process0', y)
+        else:
+            model = tf.keras.models.load_model('/home/vector/Documents/models/mouth (4).h5')
+            prediction = model.predict(images)
 
-        np.save('/home/vector/Documents/models/images' + ''.join(choice(ascii_letters) for i in range(20)) + '.npy', images)
-        np.save('/home/vector/Documents/models/y' + ''.join(choice(ascii_letters) for i in range(20)) + '.npy', y)
+            for n in range(len(y)):
+                print("Выход сети: ", prediction[n])
+                print("Распознанный образ: ", np.argmax(prediction[n]))
+                print("Верный ответ: ", classes[int(y[n])])
+                print("Распознанный браз на картинке: ", classes[np.argmax(prediction[n])])
+#KeyboardInterrupt
 
-data_creator([classes[0]])
+#data_creator(images)
+
+
+def data_creator_cropped(work_list, detect = False):
+    images = []  # массив изображений
+    y = []  # массив классов изображений
+
+    errors = []
+
+    # первая переменная - счетчик всех обработанных фото, вторая переменная - счетчик обработанных фото в папке
+    counter = [0, 0]
+    error = 0
+
+    all_photoes = 0
+
+    for wl in work_list:
+        all_photoes += photoes[work_list.index(wl)]
+
+    for folder in os.listdir(dir):
+    # переход по всем папкам директории
+        counter[1] = 0
+        print(folder in work_list)
+        if folder in work_list:
+
+            for filename in os.listdir(dir + "/" + folder):
+                counter[1] += 1
+                counter[0] += 1
+
+                end_time = datetime.now()
+                file_name = dir + '/' + folder + '/' + filename
+
+                print('Number of photo in directory:',
+                    counter[0], '. Number of photo in folder:', counter[1], '. File name:', file_name)
+                print('Time passed: {}'.format(end_time - start_time))
+                print('Time left: {}'.format((end_time - start_time) /
+                                            counter[0] * (all_photoes - counter[0])))
+                                            
+                try:
+                    image = io.imread(file_name)
+                    #plt.imshow(image, cmap=plt.cm.binary)
+                    # plt.show()
+                    
+                    y.append(int(classes.index(folder)))
+                    print('Shape of formed y:', np.array(y).shape)
+                    images.append(image)
+                    print('Shape of formed x:', np.array(images).shape)
+                except:
+
+                    errors.append([str('Number of photo in directory: ' + str(counter[0]) + '. Number of photo in folder: ' + str(counter[1]) + '. File name:' + str(file_name)),
+                                'Ошибка загрузки фото'])
+                    print(errors[-1])
+                    print('Ошибка:\n', traceback.format_exc())
+
+                print('Amount of errors:', len(errors))
+                print('')
+
+        #some_string = ''.join(choice(ascii_letters) for i in range(20)) + '.npy'
+        if(detect == False):
+            np.save('/home/vector/Documents/models/images_lips', images)
+            np.save('/home/vector/Documents/models/y_lips', y)
+        else:
+            model = tf.keras.models.load_model('/home/vector/Documents/models/mouth (4).h5')
+            prediction = model.predict(images)
+
+            for n in range(len(y)):
+                print("Выход сети: ", prediction[n])
+                print("Распознанный образ: ", np.argmax(prediction[n]))
+                print("Верный ответ: ", classes[int(y[n])])
+                print("Распознанный браз на картинке: ", classes[np.argmax(prediction[n])])
+
+data_creator_cropped(classes)
