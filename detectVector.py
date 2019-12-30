@@ -1056,11 +1056,10 @@ def lips(predictor_model, file_name, model):
         #plt.show()
 
         prediction = model.predict(image.astype('float16'))
-        #classes = ['up','down','straight']
-        return [i * 100 for i in prediction[0]]
+        classes = ['Вверх','Вниз', 'Прямо']
+        print("Распознанный браз на картинке: ", classes[np.argmax(prediction[0])])
     except:
         print('Ошибка:\n', traceback.format_exc())
-        return ['Err', 'Err', 'Err']
     
 
 def nose_size(predictor_model, file_name, path, model):
@@ -1097,14 +1096,11 @@ def nose_size(predictor_model, file_name, path, model):
 
 
         prediction = model.predict(image.astype('float16'))
-        ans = [i * 100 for i in prediction[0]]
-        ans.append(0)
-        print(ans)
+        classes = ['Картошкой', 'Курносый']
 
-        return ans
+        print("Распознанный браз на картинке: ", classes[np.argmax(prediction[0])])
     except:
         print('Ошибка:\n', traceback.format_exc())
-        return ['Err', 'Err', 'Err']
 
 
 """
